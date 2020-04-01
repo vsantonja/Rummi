@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>  
+
+    <LINK REL="STYLESHEET" HREF="estilos313.css" TYPE="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">   
+    <!--link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"-->   
+    <style>
+        .center {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 15%;
+            border: 3px solid green;
+            padding: 10px;
+            font-size:small;
+        }
+        .center_varios {
+            display: flex; justify-content: center; 
+        }
+
+    </style>
+</head>
+
+<body>
+        <h1 style="text-align: center;" class="animated bounce">Rummikub</h1>  
+        <div>
+            <button style="margin: 20px auto" class="btn btn-warning center" onclick="IniciarJuego()">Juego nuevo</button>
+            <div id="zonaSaco"> </div>
+           <!-- <button onclick="AgitarSaco()">Agitar</button> -->
+
+        </div>  
+ 
+        <div>
+            <p style="text-align: center; margin: 20px;">Fichas jugador</p>
+        </div>  
+
+        <div class="center_varios"> 
+            <button class="btn btn-warning center", onclick="repartirFichas()">Repartir </button>
+            <button class="btn btn-warning center", onclick="robarFicha()">Robar </button> 
+            <button class="btn btn-warning center", onclick="ordenarValor(misFichas)">Ordenar x núm.</button> 
+            <button class="btn btn-warning center", onclick="ordenarColor(misFichas)">Ordenar x color</button> 
+            <button class="btn btn-warning center", onclick="jugar()">Sugerir jugada</button> 
+        </div>
+
+
+
+        <div style="margin: 30px" id="zonaJugador" class="center_varios"> 
+        </div>
+        <div>
+            <p style="text-align: center; margin: 20px;" id="zonaMaquina"> Fichas Maquina</p>   
+        </div>
+      
+        <div class="center_varios">
+            <button class="btn btn-warning center" onclick="pintarMaquinaFichas(true)">Ver Fichas Máquina</button>
+            <button class="btn btn-warning center" onclick="ordenarColorMaquinaFichas()">Ordenar por color</button> 
+        </div>
+
+        <p style="text-align: center; margin: 20px;"id="zonaMesa"> Fichas Mesa </p>
+  
+
+    <script src="rummi313.js"></script>          
+
+</body>
+
+</html>

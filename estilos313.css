@@ -1,0 +1,59 @@
+.button {
+    background-color: rgb(1, 1, 39);
+    border: none;
+    color: white;
+    /*padding: 5px 5px;*/
+    text-align: center;
+    text-decoration: none;
+    font-size: 20px;
+    display: inline-block;
+    margin: 2px 1px;
+    cursor: pointer;
+ }
+  
+.figuraFichaSaco {
+        background-color: palegreen;
+        width: 30px;
+        height: 40px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 1px solid black;
+}
+
+.figuraFicha{
+        background-color: palegoldenrod;
+        width: 30px;
+        height: 40px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 1px solid black;
+        /* display: none; */
+}  
+
+.figuraFichaMaquina {
+        background-color:lightblue;
+        width: 30px;
+        height: 40px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 1px solid black;
+}
+
+
+.figuraFichaMarcada {
+        background-color:goldenrod;
+        width: 30px;
+        height: 40px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 10px;
+        border: 1px solid black;
+}
+
+body {
+        font-size: 20px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
