@@ -1,362 +1,415 @@
-    var Saco = []; 
-    var misFichas = []; 
-    var maquinaFichas = [];
-    var misTrios = [];
-    var dups = [];
-    var arrayColores = ['black', 'red', 'blue', 'magenta'];
-    var fichaActual;
-    var figuraFicha;
-    var inicio = true;
 
-    function IniciarJuego() {
-        //  location.reload(true);
-        for (let a =1; a < 3; a++) {
-            for (let v = 1; v < 14; v++) {
-                for (let c = 0; c < 4; c++) {
-                    var ficha = new Object();
-                    ficha.color = c;
-                    ficha.valor = v;
-                    Saco.push(ficha); 
-                } 
-            }
-        }
-        AgitarSaco(); 
-        repartirFichas(); 
-        //repartirFichasPrueba();
-    }
+const arrayColores = ['black', 'red', 'blue', 'magenta'];
 
-    function AgitarSaco() {
-        Saco.sort(function(a, b){return 0.5 - Math.random()}); //remeno
-        pintarSaco();
-    }
+var arraySaco = [];
+var misFichasOrig = [];
+var misFichas = [];
+var Series = [];
+var Esc = [];
+var maqFichas = [];
+var maqFichasOrig = [];
+//var dups = [];
+var figuraFicha;
+var inicio = true;
+var sacoNoVisible = true
+var numGrupo = 0;
+var primero;
+var esc = true;
 
-    function pintarSaco() {
-        if (!inicio) zonaSaco.removeChild(tabla1);
-        inicio = false;
-        zonaSaco = document.getElementById("zonaSaco");
-        tabla1 = document.createElement("table");
-        var cont = 0;
-        tabla1.id = "table1";
-        zonaSaco.appendChild(tabla1);
-        
-        for (let j = 0; j < 8; j++) {
-            if (cont === Saco.length) break;
-            fila1 = this.document.createElement("tr");
-            tabla1.appendChild(fila1); 
-            for (let i = 0; i < 13; i++) {
-                if (cont === Saco.length) break;
-                fichaActual = new Object();
-                fichaActual = Saco[cont++]
-                figuraFicha = this.document.createElement("td");
-                figuraFicha.addEventListener("click", seleccionarFicha);
-                figuraFicha.className = "figuraFichaSaco";
-                figuraFicha.id="fichaActual.valor"
-                figuraFicha.innerHTML = fichaActual.valor;
-                figuraFicha.style.color = arrayColores[fichaActual.color];
-                
-                fila1.appendChild(figuraFicha);
-            }
-        }
-    }
-
-    function repartirFichas() {
-        for (let i = 1; i < 15; i++) 
-            misFichas.push(Saco.pop());
-        for (let i = 1; i < 15; i++)  
-            maquinaFichas.push(Saco.pop());
-        pintarSaco();
-        pintarMisFichas(true);
-    }
-
-
-function repartirFichasPrueba() {
-    // reparto de prueba 1
-    misFichas = [   {color:1, valor:1},
-                    {color:0, valor:2}, 
-                    {color:1, valor:2}, 
-                    {color:3, valor:2},  
-                    {color:0, valor:8}, 
-                    {color:0, valor:8},  
-                    {color:1, valor:8},
-                    {color:1, valor:8},  
-                    {color:2, valor:8},
-                    {color:2, valor:8}, 
-                    {color:3, valor:8},  
-                    {color:1, valor:13},
-                    {color:2, valor:13}, 
-                    {color:2, valor:13}
-             ];
-
-   // reparto de prueba 1 para el computador
-    maquinasFichas = [   {color:1,valor:1},{color:1,valor:1},
-                    {color:0,valor:2},{color:1, valor:2},
-                    {color:3,valor:2},
-                    {color:1,valor:7},{color:1,valor:7},
-                    {color:0,valor:8},{color:1,valor:8},
-                    {color:3,valor:8},
-                    {color:3,valor:8},{color:1,valor:12},
-                    {color:1,valor:13},{color:2,valor:13}
-             ];
-    pintarMisFichas(true);
+function nuevoJuego() {
+    location.reload();
 }
 
-function robarFicha() {
-
-        var nuevaFicha = [];
-        misFichas.push(Saco.pop());
- 
-        pintarSaco();
-        pintarMisFichas(false);
-    }
-
-    
-    function ordenarValor(arreglo) {
-        arreglo.sort(function(a, b){return (a.valor*100 + a.color) -  (b.valor*100 + b.color)});
-        pintarMisFichas(false);
-    }
-
-    function ordenarColor(arreglo) {
-         
-        arreglo.sort(function(a, b){return (a.color*100 + a.valor) -  (b.color*100 + b.valor)});
-        pintarMisFichas(false);
-    }
-
-    function pintarMisFichas(primera) {
-        if (!primera) zonaJugador.removeChild(tablaJugador);
-        prmiera=false;
-        zonaJugador = document.getElementById("zonaJugador");
-        tablaJugador = this.document.createElement("table");
-        tablaJugador.id = "tablaJugador";
-        zonaJugador.appendChild(tablaJugador);
-        filaJugador= this.document.createElement("tr");
-        tablaJugador.appendChild(filaJugador); 
-
-        //Fichas del jugador           
-        for (let i = 0; i < misFichas.length; i++) {
-            figuraFicha = this.document.createElement("td");
-            figuraFicha.addEventListener("click", seleccionarFicha);
-            figuraFicha.className = "figuraFicha";
-            figuraFicha.id = "miFicha" + i;
-            fichaActual = new Object();
-            fichaActual = misFichas[i];
-            figuraFicha.innerHTML = fichaActual.valor;
-            figuraFicha.style.color = arrayColores[fichaActual.color];
-            filaJugador.appendChild(figuraFicha);  // la dibujo
-        }
-        filaJugador= this.document.createElement("tr");
-        tablaJugador.appendChild(filaJugador); 
-
-        for (let i = 0; i < misFichas.length; i++) {
-            numFicha = this.document.createElement("td");
-            numFicha.innerHTML = i.toString();
-            filaJugador.appendChild(numFicha);
-        }
-    }      
-
-    function marcaFicha(pos, tamanyo) {
-        for (let j = 0, i=0; i < tamanyo; j++) {
-            if (!dups[pos + j]) { 
-                figuraFicha = this.document.getElementById("miFicha"+ (pos + j));
-                figuraFicha.className = "figuraFichaMarcada";
+function iniciar() {
+    let i = 0;
+    for (let a = 1; a < 3; a++) {           // hay 2 de cada
+        for (let v = 1; v < 14; v++) {      // 13 valores
+            for (let c = 0; c < 4; c++) {   // y 4 colores
+                arraySaco[i] = c * 100 + v;  // Codif. por color. Es al codif. por defecto. 
+                // Las fichas del saco siempre son así
+                // Ejemplo el 108 es de color 1 y valor 8 
                 i++;
             }
         }
-    }       
+    }
+    arraySaco.sort(function (a, b) { return 0.5 - Math.random() });  //remuevo el saco
+    repartirFichas();
+    document.getElementById('botonRepartir').disabled = true;
+    primero = 0;
+    //repartirFichasPrueba();
+}
 
+function verSaco() {
+    var botonSaco = document.getElementById('botonSaco');
+    if (sacoNoVisible) {
+        pintarSaco();
+        botonSaco.innerText = "Ocultar Saco";
+    } else {
+        zonaSaco.removeChild(tabla1);
+        botonSaco.innerText = "VerSaco";
+    }
+    sacoNoVisible = !sacoNoVisible;
+}
 
-    function pintarMaquinaFichas(primera) {
-        if (!primera) zonaMaquina.removeChild(tablaMaquina);
-        zonaMaquina = document.getElementById("zonaMaquina");
-        tablaMaquina = this.document.createElement("table");
-        tablaMaquina.id = "tablaMaquina";
-        zonaMaquina.appendChild(tablaMaquina);
-        filaMaquina= this.document.createElement("tr");
-        tablaMaquina.appendChild(filaMaquina); 
+function pintarSaco() {
+    zonaSaco = document.getElementById("zonaSaco");
+    tabla1 = document.createElement("table");
+    tabla1.id = "tablaSaco";
+    zonaSaco.appendChild(tabla1);
 
-        //Fichas de la máquina
-        for (let i = 0; i < maquinaFichas.length; i++) {
+    let i = 0;
+    for (let c = 0; c < 8; c++) {  // 8 filas
+        if (i == arraySaco.length) break;
+        fila1 = this.document.createElement("tr");
+        tabla1.appendChild(fila1);
+        for (let f = 0; f < 13; f++) {  // 13 filas 8*13 = 104 fichas
+            if (i == arraySaco.length) break;
             figuraFicha = this.document.createElement("td");
-            figuraFicha.className = "figuraFichaMaquina";
-            fichaActual = maquinaFichas[i];
-            figuraFicha.innerHTML = fichaActual.valor;
-            figuraFicha.style.color = arrayColores[fichaActual.color];
-            filaMaquina.appendChild(figuraFicha);  // la dibujo
+          //  figuraFicha.addEventListener("click", seleccionarFicha);
+            figuraFicha.className = "figuraFichaSaco";
+            figuraFicha.innerHTML = arraySaco[i] % 100;
+            figuraFicha.id = arraySaco[i];
+            figuraFicha.style.color = arrayColores[Math.floor(arraySaco[i] / 100)];
+            fila1.appendChild(figuraFicha);
+            i++;
         }
-    }                 
-
-
-    function seleccionarFicha(e) {
-    //          var node = e.target.cloneNode(true);
-        var tabla = document.getElementById("table");
-        var fila = document.createElement("tr");
-        tabla.appendChild(fila);
-        fila.appendChild(node);
     }
+}
 
-    function jugar() {
-        buscaSeriesLocal();
-        // buscaSeriesMesa();
-        // buscaEscalerasLocal();
-        // buscaEscalerasMesa();
-        // SeleccionaEstrategia();
-        // pintaMesa();
+function repartirFichas() {
+    for (let i = 0; i < 14; i++) {// se reparten 14 fichas
+        misFichas.push(arraySaco.pop());
+        misFichasOrig[i] = misFichas[i];
+        maqFichas.push(arraySaco.pop());
+        maqFichasOrig[i] = maqFichas[i];
     }
- 
-    function buscaSeriesLocal() {
-    // esta función buscaseries cuyos compenntes sean de disintos colores
-    // contValor es un vector contador del número de fichas con cada valor
+    pintarMisFichas();
+}
 
-        ordenarValor(misFichas);
-        var index=0, index2=0;
-        var contValor = Array(13);
-        contValor.fill(0);
-        var contColor = Array(4);
-        contColor.fill(0);
-        dups = Array(misFichas.length);
-        numeroMisFichas = Array(misFichas.length);
-        colorMisFichas = Array(misFichas.length);
 
-        for (let i = 0; i < numeroMisFichas.length; i++) {
-            numeroMisFichas[i] = misFichas[i].valor;
-            colorMisFichas[i] =  misFichas[i].color;
-        }
-        for (let v = 1; v <= 13; v++) {
-            while ( index < numeroMisFichas.length && numeroMisFichas[index] == v) {
-                contValor[v-1]++; 
-                // marco la fichas "Repes" : mismo color y mismo valor
-                if (contValor[v-1] >= 2 && colorMisFichas[index] == colorMisFichas[index-1]) {
-                    dups[index]=true;
-                }                
-                index++
-            }
-        }
-        
+function repartirFichasPrueba() {
+    // reparto de prueba 1: tiene uns a escalera de 4 azul(2) y dos rojas (1)
+    // misFichas = [8, 101, 102, 302, 105, 106, 103, 4, 203, 204, 204, 107, 205, 206];
+    // reparto de prueba 2: tiene una a serie de 3 azul(2) y dos rojas (1)
+    misFichas = [101, 102, 302, 105, 106, 103, 303, 203, 204, 204, 107, 205, 206];
 
-        console.log(contValor);   
-        console.log(dups);
+    // reparto de prueba 1 para el computador
+    maqFichas = [101, 102, 302, 100, 105, 103, 402, 203, 203, 303, 107, 213, 213, 1308];
 
-        var acc;
-        // busco "posibles" trios locales
-        // posible trios (sin mirar que sean de distinto color)
-               
-        tamSeries = contValor.filter(funMasDe2);
-        function funMasDe2(value) {
-            return value > 2;
-        }
-        console.log("Tamaño de las series posibles: " + tamSeries);
+    guardarActual();
+    pintarMisFichas()
+}
 
-        posSeries = contValor.map(funAuxSeries).filter(funLimpiar);
-        function funAuxSeries(value,index,array) {
-            acc=0;
-            if (value > 2) {
-                for (let i=0; i<index; i++) acc += array[i];
-                return acc;
-            } else return -1;
-        }
-        function funLimpiar(value) {
-            return value > -1;
-        }
-      
-        console.log("Posicion de las series posibles en mis fichas " + posSeries);
-        
-        
-        for (let p = 0; p < posSeries.length; p++){
-            if (isSeries(posSeries[p], tamSeries[p], p)) {
-                marcaFicha(posSeries[p], tamSeries[p]);
-            }
-        }
+function robarFicha() {
+    recuperaOrig();
+    misFichas.push(arraySaco.pop());
+    guardarActual();
+    pintarMisFichas();
+}
 
-        console.log("Posicion de las series reales en mis fichas " + posSeries);
+function guardarActual() {
+    for (let i = 0; i < misFichas.length; i++) {
+        misFichasOrig[i] = misFichas[i];
+        maqFichasOrig[i] = maqFichas[i];
+    }
+}
 
-        function isSeries(pos, tam,p) {
-            switch(tam) {
-                case 3: return isS3(pos, p); break;
-                case 4: return isS4(pos, p); break;
-                case 5: return isS5(pos, p); break;
-                case 6: return isS6(pos, p); break;
-                case 7: return isS7(pos, p); break;
-                case 8: return isS8(pos, p); break;
-                default: alert ("Ha pasado algo raro. Consulta con tu psicoanalista");
-            }
-        }
+function recuperaOrig() {
+    esc=true;
+    for (let i = 0; i < misFichasOrig.length; i++) {
+        misFichas[i] = misFichasOrig[i];
+        maqFichas[i] = maqFichasOrig[i];
+    }
+}
 
-        function howManyDups(start, end) {
-            return dups.slice(start, end+1).filter (isDup).length;
 
-            function  isDup(value) {
-                return value == true;
-            }
-        
-        console.log("Dups in myTokens " + howManyDups(0, misFichas.length+1) );
-        }
+// para buscar series conviene esta codificación de las fichas
+// Ejemplo: 1103 es una ficha del número 11 y color 3
+function codifSer(arr) {
+    let val;
+    let col;
+    for (let i = 0; i < arr.length; i++) {
+        col = Math.floor(arr[i] / 100);
+        val = arr[i] % 100;
+        if (val >= 20) { arr[i] = (val - 20) * 100 + col + 20; }
+        else { arr[i] = val * 100 + col; }
+    }
+}
 
-        
-        function isS3(pos,p) {
-            
-            //if ((!dups[pos + 1]) &&  (!dups[pos + 2])) {
-            if (howManyDups(pos,pos+3) == 0) {
-                console.log ("hay una serie de 3 válida en la posición " +  pos);
-                return(true);
+// codif. por defecto
+// function porColor(arr) {
+//     if (codifPorColor) return;
+//     else codifPorColor = true;
+//     let val;
+//     let col;
+//     for (let i = 0; i < arr.length; i++) {
+//         val = Math.floor(arr[i]/100);
+//         col = arr[i] % 100;
+//         if (col >= 20) arr[i] = (col-20)*100 + val+20;
+//         else  arr[i] = col*100 + val;
+//     }
+// }
+
+function ordenar(arreglo) {
+    arreglo.sort(function (a, b) { return (a - b) });
+}
+
+function pintarMisFichas() {
+    if (document.getElementById("tablaJugador")) {
+        zonaJugador.removeChild(tablaJugador);
+    } // si existe la borro
+    zonaJugador = document.getElementById("zonaJugador");
+    tablaJugador = this.document.createElement("table");
+    tablaJugador.id = "tablaJugador";
+    zonaJugador.appendChild(tablaJugador);
+    filaJugador = this.document.createElement("tr");
+    tablaJugador.appendChild(filaJugador);
+
+    //Fichas del jugador           
+    for (let i = 0; i < misFichas.length; i++) {
+        figuraFicha = this.document.createElement("td");
+        figuraFicha.addEventListener("click", seleccionarGrupo);
+        figuraFicha.className = "figuraFicha";
+        if (!esc) {
+            figuraFicha.id = "Ficha" + i;
+            let color = misFichas[i] % 100;
+            if (color >= 20) { // es un dup
+                figuraFicha.style.color = arrayColores[(color - 20)];
+                figuraFicha.innerHTML = Math.floor(misFichas[i] / 100) + "D";
             } else {
-                console.log ("La serie de 3 en la posición " +  pos + " NO VALE");
-                posSeries.splice(p, p); //quita la entrada del vector posSeries
-                tamSeries.splice(p, p); //quita la entrada del vector tamSeries
-                return(false);
+                figuraFicha.style.color = arrayColores[color];
+                figuraFicha.innerHTML = Math.floor(misFichas[i] / 100);
+            }
+        } else {
+            figuraFicha.id = "Ficha" + i;
+            let valor = misFichas[i] % 100;
+            if (valor >= 20) { // es un dup
+                figuraFicha.innerHTML = (valor - 20) + " D";
+            } else {
+                figuraFicha.innerHTML = valor;
+            }
+            figuraFicha.style.color = arrayColores[Math.floor(misFichas[i] / 100)];
+        }
+        filaJugador.appendChild(figuraFicha);  // la dibujo
+    }
+
+    // número las posiciones de las fichas
+    filaJugador = this.document.createElement("tr");
+    tablaJugador.appendChild(filaJugador);
+    for (let i = 0; i < misFichas.length; i++) {
+        numFicha = this.document.createElement("td");
+        numFicha.innerHTML = i.toString();
+        //numFicha.className = .
+        filaJugador.appendChild(numFicha);
+    }
+}
+
+function marcaFichas(arr, pos, tam) {
+    // recuerda que para que los "Id" de las fichas sean correctos PREVIAMENTE hay que pintarFichas
+    for (let i = 0; i < tam; i++) {
+        figuraFicha = this.document.getElementById("Ficha" + (pos + i));
+        figuraFicha.id = "S" + numGrupo++;
+        figuraFicha.className = "figuraFichaMarcada";
+    }
+}
+
+function pintarMaquinaFichas() {
+    if (zonajugador.getElementById("tablaMaqina")) {
+        zonaJugador.removeChild(tablaMaquina);
+    } // si existe la borro
+    if (tablaMaquina) { zonaJugador.removeChild(tablaMaquina) } // si existe la borro
+    zonaMaquina = document.getElementById("zonaMaquina");
+    tablaMaquina = this.document.createElement("table");
+    tablaMaquina.id = "tablaMaquina";
+    zonaMaquina.appendChild(tablaMaquina);
+    filaMaquina = this.document.createElement("tr");
+    tablaMaquina.appendChild(filaMaquina);
+
+
+    //Fichas de la máquina
+    for (let i = 0; i < maqFichas.length; i++) {
+        figuraFicha = this.document.createElement("td");
+        figuraFicha.className = "figuraFichaMaquina";
+        figuraFicha.id = "maqFicha" + i;
+        // fichaActual = new Object();
+        let valor = misFichas[i] % 100;
+        if (valor > 20) { // es un dup
+            figuraFicha.innerHTML = (valor - 20) + " D";
+        } else {
+            figuraFicha.innerHTML = valor;
+        }
+        figuraFicha.style.color = arrayColores[Math.floor(maqFichas[i] / 100)];
+        filaMaquina.appendChild(figuraFicha);  // la dibujo
+    }
+    // número las posiciones de las fichas
+    filaMaquina = this.document.createElement("tr");
+    tablaMaquina.appendChild(filaJugador);
+    for (let i = 0; i < maqFichas.length; i++) {
+        numFicha = this.document.createElement("td");
+        numFicha.innerHTML = i.toString();
+        //numFicha.className = .
+        filaMaquina.appendChild(numFicha);
+    }
+}
+
+function seleccionarGrupo(e) {
+    // var node = e.target.cloneNode(true);
+    // var tabla = document.getElementById("miFicha" + i);
+    // var fila = document.createElement("tr");
+    // tabla.appendChild(fila);
+    // fila.appendChild(node);
+    for (let i = 0; i < misFichas.length; i++)
+        console.log(document.activeElement.tagName)
+
+
+}
+
+var textoJ = document.getElementById("textoJugador");
+
+// ********************************************************************************************
+function buscarSeries() {
+    var du = [];
+    if (!primero) {
+        recuperaOrig();
+        // pintarMisFichas();
+    }
+    esc = false;
+    // esta función busca series cuyos componentes sean del mismo valor y distinto color
+    codifSer(misFichas);    // El num. de la fichas da prioridad al valor. 
+    // Ejemplo la 302 es una fichas de valor 3 y color 2
+    ordenar(misFichas);
+    pintarMisFichas();
+    grupoValor = [];
+    //separo las fichas en grupos del mismo valor
+    for (let n = 0; n < 13; n++) {
+        grupoValor[n] = misFichas.filter(el => Math.floor(el / 100) == n + 1
+        );
+    }
+
+    //este bucle pone una marca los dups (Suma 20 al color)
+    // ejemplo: la 322 una fichas de valor 3 y color 2 que está duplicada (está tb. la 302)
+
+    for (let n = 0; n < 13; n++) {
+        let cont = 0;
+        for (let i = 1; i < grupoValor[n].length; i++) {
+            if (grupoValor[n][i] === grupoValor[n][i - 1]) { // el elemento i es un dup
+                grupoValor[n][i] += 20;  // los dups van del 20 al 23
+                cont++;
             }
         }
-
-        function isS4(pos,p) {
-            //if ((!dups[pos + 1]) &&  (!dups[pos + 2]) && !dups[pos+3]){
-            if  (howManyDups(pos, pos + 3) == 0) {
-                console.log ("hay una serie de 4 válida en la posición " +  pos);
-                return (true);  // no hay que hacer nada
-            } else if (howManyDups(pos, pos + 4)== 2) { 
-                console.log ("La serie de 4 válida en la posición " +  pos + " NO VALE");
-                posSeries.splice(p, p); //quita la entrada del vector posSeries
-                tamSeries.splice(p, p); //quita la entrada del vector tamSeries
-                return(false);
-            } else { // hay un dup
-                console.log ("hay una serie de 3 válida en la posición " +  pos + " con 1 dup");
-                tamSeries[p] = 3;
-                return (true);
+        du[n] = cont;
+        ordenar(grupoValor[n]);
+    }
+    //reconstruyo misFichas con los subgrupos ordenados
+    {
+        let j = 0;
+        for (let n = 0; n < 13; n++) {
+            for (let i = 0; i < grupoValor[n].length; i++) {
+                misFichas[j++] = grupoValor[n][i];
             }
-            
         }
+    }
+    //    pintarMisFichas();
 
-        function isS5(pos,p) {
-            if (howManyDups(pos, pos + 5) == 1){  
-                console.log ("hay una S4 válida en la posición " +  pos + " con 1 dup");
-                tamSeries[p] = 4;
-            } else {  // hay 2 repes, entonce ses un S3
-                console.log ("hay una S3 válida en la posición " +  pos + " con 2 dups");
-                tamSeries[p] = 3;
+    var tamSer = [];
+    for (let n = 0; n < 13; n++) {
+        tamSer[n] = grupoValor[n].length - du[n]; // de 0 a 4
+        //     console.log("hay serie de valor : " + n + " de " + imaxSer[n] + " a " + fmaxSer[n])
+    }
+    var tmaxSer = Math.max(...tamSer); // ... = spread operator
+    if (tmaxSer >= 3) {
+        var ivalor = tamSer.indexOf(tmaxSer);
+        console.log("la serie mejor es de " + tmaxSer + " fichas de valor " + ivalor + 1);
+        var p = 0;
+        for (let n = 0; n != ivalor; n++) {
+            p += grupoValor[n].length
+        }
+        pintarMisFichas();
+        marcaFichas(misFichas, p, tmaxSer);
+        textoJ.innerHTML = "Juega la serie marcada";
+    } else { textoJ.innerHTML = "No hay ninguna serie en tu mano"; }
+    primero = false;
+}
+
+// ********************************************************************************************
+function buscarEscaleras() {
+    // esta función busca escaleras cuyos compenentes sean del mismo color
+    esc = true;
+    var du = [];
+    var grupoColor = [];
+    if (!primero) {
+       recuperaOrig();
+       // pintarMisFichas();
+    }
+    //porColor(misFichas);
+    ordenar(misFichas);
+    pintarMisFichas();
+    for (let c = 0; c <= 3; c++) {
+        grupoColor[c] = misFichas.filter(el => Math.floor(el / 100) == c);
+    }
+     //este bucle pone una marca los dups +20 en el valor
+    for (let c = 0; c <= 3; c++) {
+        let cont = 0;
+        for (let i = 1; i < grupoColor[c].length; i++) {
+            if (grupoColor[c][i] === grupoColor[c][i - 1]) { // el elemento i es un dup
+                grupoColor[c][i] += 20; // los dups van del 21 al 33
+                cont++;
             }
-            return (true);
+            du[c] = cont;
+            ordenar(grupoColor[c]);
         }
-
-        function isS6(pos,p) {
-            if (howManyDups(pos, pos + 5) == 2){  // hay 2 dups, entonces  es un S4
-                console.log ("hay una S4 válida en la posición " +  pos + " con 2 dup");
-                tamSeries[p] = 4;
-            } else {  // hay 3 dups, entonces es una S3
-                console.log ("hay una S3 válida en la posición " +  pos + " con 3 dups");
-                tamSeries[p] = 3;
+    }
+    jndex = 0;
+    for (let c = 0; c <= 3; c++) {
+        for (let i = 0; i < grupoColor[c].length; i++) {
+            misFichas[jndex++] = grupoColor[c][i];
+        }
+    }
+    //   pintarMisFichas();
+    var ini, imax;
+    var fin, fmax;
+    var tam, tmax, lim;
+    var imaxEsc = [], fmaxEsc = [], tmaxEsc = [];
+    for (let c = 0; c <= 3; c++) {
+        ini = 0; imaxEsc[c] = 0;
+        fin = 0; fmaxEsc[c] = 0;
+        tam = 1; tmaxEsc[c] = 1;
+        lim = grupoColor[c].length - du[c];
+        for (let i = 1; i <= lim; i++) {
+            if ((grupoColor[c][i] != grupoColor[c][i - 1] + 1) || (i == lim)) {
+                if (tam >= tmaxEsc[c]) {
+                    imax = ini;
+                    fmax = fin;
+                    tmax = tam;
+                }
+                ini = i;
+                fin = i;
+                tam = 1;
+            } else {
+                fin = i;
+                tam++;
             }
-            return (true);       
         }
-        
-        function isS7(pos,p) {
-            // seguro que hay 3 dups, entonces es una S4 y puede haber un trio que no devuelvo
-            console.log ("hay una S4 válida en la posición " +  pos + " con 3 dups");
-            tamSeries[p] = 4;
-            return (true);       
-        }
+        imaxEsc[c] = imax;
+        fmaxEsc[c] = fmax;
+        tmaxEsc[c] = tmax;
+        if (tmax >= 3)
+            console.log("hay escalera de color : " + c + " de " + imaxEsc[c] + " a " + fmaxEsc[c]);
 
-        function isS8(pos,p) {
-            // seguro que hay 4 dups, entonces es hay dos S4, devuelvo uno
-            console.log ("hay una S4 válida en la posición " +  pos + " con 4 dups");
-            tamSeries[p] = 4;
-            return (true);       
-        }
+        var tmaxmax = Math.max(...tmaxEsc); // ... = spread operator
+        if (tmaxmax >= 3) {
+            var icolor = tmaxEsc.indexOf(tmaxmax);
+            console.log("la escalera mejor es de " + tmaxmax + " fichas de color ?????" + icolor);
+            var p = 0;
+            for (let c = 0; c != icolor; c++) {
+                p += grupoColor[c].length
+            }
+            pintarMisFichas();
+            marcaFichas(misFichas, p + imaxEsc[icolor], tmaxmax);
+            textoJ.innerHTML = "Juega la escalera marcada";
+        } else { textoJ.innerHTML = "No hay ninguna escalera en tu mano"; }
 
     }
+    primero = false;
+}
+
