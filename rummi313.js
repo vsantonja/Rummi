@@ -120,6 +120,8 @@ function robarFicha() {
 
 // ********************************************************************************************
 function guardarActual() {
+    misFichasOrig = [];
+  // let  = misFichasOrig.slice(0,misFichas.length-1)
     for (let i = 0; i < misFichas.length; i++) {
         misFichasOrig[i] = misFichas[i];
         maqFichasOrig[i] = maqFichas[i];
@@ -271,34 +273,24 @@ function pintarMaquinaFichas() {
 // ********************************************************************************************
 
 function seleccionarGrupo(e) {
-    // var node = e.target.cloneNode(true);
-    // var tabla = document.getElementById("miFicha" + i);
-    // var fila = document.createElement("tr");
-    // tabla.appendChild(fila);
-    // fila.appendChild(node);
-    //for (let i = 0; i < misFichas.length; i++)
     var auxId;
     var idFicha;
     var figuraFichaMesa;
     idFicha = this.id;
     if (idFicha.startsWith("G")) {
         idGrupo = idFicha.slice(0, 4);
-
     } else return;
     var arrayChildren = [...filaJugador.children];
     var countG = 0;
     var inicG = -1;
     for (let i = 0; i < arrayChildren.length; i++) {
-        //       if (element.children[i].nodeType == 1){
         auxId = arrayChildren[i].id;
         if (auxId.startsWith(idGrupo)) {
             if (inicG == -1) inicG = i;
             figuraFichaMesa = document.createElement("td");
             figuraFichaMesa.className = "figuraFicha";
             figuraFichaMesa.id = idFicha;
-
             if (!esc) {
-
                 let color = misFichas[i] % 100;
                 if (color >= 20) { // es un dup
                     figuraFichaMesa.style.color = arrayColores[(color - 20)];
@@ -308,7 +300,6 @@ function seleccionarGrupo(e) {
                     figuraFichaMesa.innerHTML = Math.floor(misFichas[i] / 100);
                 }
             } else {
-
                 let valor = misFichas[i] % 100;
                 if (valor >= 20) { // es un dup
                     figuraFichaMesa.innerHTML = (valor - 20) + " D";
@@ -326,7 +317,6 @@ function seleccionarGrupo(e) {
     esc = true;
     guardarActual();
     pintarMisFichas();
-
     // número las posiciones de las fichas
     filaMesaI = document.createElement("tr");
     tablaMesa.appendChild(filaMesaI);
