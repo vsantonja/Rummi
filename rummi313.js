@@ -15,6 +15,7 @@ var sacoNoVisible = true
 var numGrupo = 0;
 var primero;
 var esc = true;
+var filaMesa;
 
 function nuevoJuego() {
     location.reload();
@@ -30,13 +31,21 @@ function iniciar() {
                 // Ejemplo el 108 es de color 1 y valor 8 
                 i++;
             }
-        }
+0        }
     }
     arraySaco.sort(function (a, b) { return 0.5 - Math.random() });  //remuevo el saco
     repartirFichas();
     document.getElementById('botonRepartir').disabled = true;
     primero = 0;
     //repartirFichasPrueba();
+     // preparamos la mesa de jeugo
+     zonaMesa = document.getElementById("zonaMesa");
+     tablaMesa = this.document.createElement("table");
+     tablaMesa.id = "tablaMesa";
+     zonaMesa.appendChild(tablaMesa);
+     filaMesa = this.document.createElement("tr");
+     tablaMesa.appendChild(filaMesa);
+ 
 }
 
 function verSaco() {
@@ -74,6 +83,8 @@ function pintarSaco() {
             i++;
         }
     }
+   
+
 }
 
 function repartirFichas() {
@@ -107,6 +118,7 @@ function robarFicha() {
     pintarMisFichas();
 }
 
+// ********************************************************************************************
 function guardarActual() {
     for (let i = 0; i < misFichas.length; i++) {
         misFichasOrig[i] = misFichas[i];
@@ -114,6 +126,7 @@ function guardarActual() {
     }
 }
 
+// ********************************************************************************************
 function recuperaOrig() {
     esc=true;
     for (let i = 0; i < misFichasOrig.length; i++) {
@@ -122,7 +135,7 @@ function recuperaOrig() {
     }
 }
 
-
+// ********************************************************************************************
 // para buscar series conviene esta codificación de las fichas
 // Ejemplo: 1103 es una ficha del número 11 y color 3
 function codifSer(arr) {
@@ -136,23 +149,24 @@ function codifSer(arr) {
     }
 }
 
-// codif. por defecto
-// function porColor(arr) {
-//     if (codifPorColor) return;
-//     else codifPorColor = true;
-//     let val;
-//     let col;
-//     for (let i = 0; i < arr.length; i++) {
-//         val = Math.floor(arr[i]/100);
-//         col = arr[i] % 100;
-//         if (col >= 20) arr[i] = (col-20)*100 + val+20;
-//         else  arr[i] = col*100 + val;
-//     }
-// }
+// ********************************************************************************************
+function codifEsc(arr) {
+    let val;
+    let col;
+    for (let i = 0; i < arr.length; i++) {
+        val = Math.floor(arr[i]/100);
+        col = arr[i] % 100;
+        if (col >= 20) arr[i] = (col-20)*100 + val+20;
+        else  arr[i] = col*100 + val;
+    }
+}
+// ********************************************************************************************
 
 function ordenar(arreglo) {
     arreglo.sort(function (a, b) { return (a - b) });
 }
+
+// ********************************************************************************************
 
 function pintarMisFichas() {
     if (document.getElementById("tablaJugador")) {
@@ -170,8 +184,8 @@ function pintarMisFichas() {
         figuraFicha = this.document.createElement("td");
         figuraFicha.addEventListener("click", seleccionarGrupo);
         figuraFicha.className = "figuraFicha";
+        figuraFicha.id = "Ficha" + i;
         if (!esc) {
-            figuraFicha.id = "Ficha" + i;
             let color = misFichas[i] % 100;
             if (color >= 20) { // es un dup
                 figuraFicha.style.color = arrayColores[(color - 20)];
@@ -181,7 +195,6 @@ function pintarMisFichas() {
                 figuraFicha.innerHTML = Math.floor(misFichas[i] / 100);
             }
         } else {
-            figuraFicha.id = "Ficha" + i;
             let valor = misFichas[i] % 100;
             if (valor >= 20) { // es un dup
                 figuraFicha.innerHTML = (valor - 20) + " D";
@@ -194,23 +207,26 @@ function pintarMisFichas() {
     }
 
     // número las posiciones de las fichas
-    filaJugador = this.document.createElement("tr");
-    tablaJugador.appendChild(filaJugador);
+    filaJugadorIn = this.document.createElement("tr");
+    tablaJugador.appendChild(filaJugadorIn);
     for (let i = 0; i < misFichas.length; i++) {
         numFicha = this.document.createElement("td");
         numFicha.innerHTML = i.toString();
         //numFicha.className = .
-        filaJugador.appendChild(numFicha);
+        filaJugadorIn.appendChild(numFicha);
     }
 }
 
 function marcaFichas(arr, pos, tam) {
+    var idFicha;
     // recuerda que para que los "Id" de las fichas sean correctos PREVIAMENTE hay que pintarFichas
     for (let i = 0; i < tam; i++) {
         figuraFicha = this.document.getElementById("Ficha" + (pos + i));
-        figuraFicha.id = "S" + numGrupo++;
+        idFicha = figuraFicha.id;
+        figuraFicha.id = "G00" + numGrupo + "." + idFicha ;
         figuraFicha.className = "figuraFichaMarcada";
     }
+    numGrupo++;
 }
 
 function pintarMaquinaFichas() {
@@ -252,16 +268,74 @@ function pintarMaquinaFichas() {
     }
 }
 
+// ********************************************************************************************
+
 function seleccionarGrupo(e) {
     // var node = e.target.cloneNode(true);
     // var tabla = document.getElementById("miFicha" + i);
     // var fila = document.createElement("tr");
     // tabla.appendChild(fila);
     // fila.appendChild(node);
-    for (let i = 0; i < misFichas.length; i++)
-        console.log(document.activeElement.tagName)
+    //for (let i = 0; i < misFichas.length; i++)
+    var auxId;
+    var idFicha;
+    var figuraFichaMesa;
+    idFicha = this.id;
+    if (idFicha.startsWith("G")) {
+        idGrupo = idFicha.slice(0, 4);
 
+    } else return;
+    var arrayChildren = [...filaJugador.children];
+    var countG = 0;
+    var inicG = -1;
+    for (let i = 0; i < arrayChildren.length; i++) {
+        //       if (element.children[i].nodeType == 1){
+        auxId = arrayChildren[i].id;
+        if (auxId.startsWith(idGrupo)) {
+            if (inicG == -1) inicG = i;
+            figuraFichaMesa = document.createElement("td");
+            figuraFichaMesa.className = "figuraFicha";
+            figuraFichaMesa.id = idFicha;
 
+            if (!esc) {
+
+                let color = misFichas[i] % 100;
+                if (color >= 20) { // es un dup
+                    figuraFichaMesa.style.color = arrayColores[(color - 20)];
+                    figfiguraFichaMesauraFicha.innerHTML = Math.floor(misFichas[i] / 100) + "D";
+                } else {
+                    figuraFichaMesa.style.color = arrayColores[color];
+                    figuraFichaMesa.innerHTML = Math.floor(misFichas[i] / 100);
+                }
+            } else {
+
+                let valor = misFichas[i] % 100;
+                if (valor >= 20) { // es un dup
+                    figuraFichaMesa.innerHTML = (valor - 20) + " D";
+                } else {
+                    figuraFichaMesa.innerHTML = valor;
+                }
+                figuraFichaMesa.style.color = arrayColores[Math.floor(misFichas[i] / 100)];
+            }
+            filaMesa.appendChild(figuraFichaMesa);  // la dibujo
+            countG++;
+        } else { }
+    }
+    var grup = misFichas.splice(inicG, countG);
+    if (!esc) codifEsc(misFichas);
+    esc = true;
+    guardarActual();
+    pintarMisFichas();
+
+    // número las posiciones de las fichas
+    filaMesaI = document.createElement("tr");
+    tablaMesa.appendChild(filaMesaI);
+    for (let i = 0; i < countG; i++) {
+        numFicha = document.createElement("td");
+        numFicha.innerHTML = i.toString();
+        //numFicha.className = .
+        filaMesaI.appendChild(numFicha);
+    }
 }
 
 var textoJ = document.getElementById("textoJugador");
