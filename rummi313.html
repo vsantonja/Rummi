@@ -25,53 +25,58 @@
 
 <body>
         <h1 style="text-align: center;" class="animated bounce">Rummikub</h1>  
+
         
         <div class="center_varios"> 
             <button style="margin: 10px auto" class="btn btn-warning center" onclick="nuevoJuego()">New play</button>
             <button style="margin: 10px auto" class="btn btn-warning center" onclick="iniciar()"id = "botonRepartir">Repartir</button>
             <button style="margin: 10px auto" class="btn btn-warning center" onclick="verSaco()" id="botonSaco">Ver saco</button>
-            <!-- <button style="margin: 20px auto" class="btn btn-warning center" onclick="ocultarSaco()" disabled=true id="ocultarSaco">Ocultar saco</button> -->
-        
-           <!-- <button onclick="AgitarSaco()">Agitar</button> -->
+            <button style="margin: 10px auto" class="btn btn-warning center" onclick="cambioTurno()" id="botonTurno">Cambio Turno</button>        
         </div> 
 
      <div class="center_varios"> 
-            <!-- <button class="btn btn-warning center", onclick="repartirFichas()">Repartir </button> -->
-            <!-- <button class="btn btn-warning center", onclick="ordenarValor(misFichas)">Ordenar x núm.</button> 
-            <button class="btn btn-warning center", onclick="ordenarColor(misFichas)">Ordenar x color</button>  -->
-            <button class="btn btn-warning center", onclick="buscarSeries()">Series</button> 
-            <button class="btn btn-warning center", onclick="buscarEscaleras()">Escaleras</button> 
-            <button class="btn btn-warning center", onclick="robarFicha()">Robar </button>
+        
+            <button class="btn btn-warning center", id="botonOrdenar"onclick="ordenarValor(misFichas)">Ordenar x núm.</button> 
+            <!-- <button class="btn btn-warning center", onclick="ordenarColor(misFichas)">Ordenar x color</button>  -->
+            <button class="btn btn-warning center", onclick="buscarSeries(true)">Series</button> 
+            <button class="btn btn-warning center", onclick="buscarEscaleras(true)">Escaleras</button> 
+            <button class="btn btn-warning center", onclick="robarFicha(true)">Robar </button>
     </div>
-    
-    
-    
-    <div id="zonaSaco">
-    </div>
+    <div id="zonaSaco"> </div>
 
     <!-- <div>
         <p style="text-align: center; margin: 10px;">Fichas jugador</p>
     </div>   -->
 
-    <h2> Fichas Jugador </h2>
+    <h2 style="text-align: center"> Fichas Jugador </h2>
 
 
 
         <div style="margin: 30px" id="zonaJugador" class="center_varios"> 
         </div>
         <div>
-            <p style="text-align: center; margin: 10px;" id="textoJugador"> Propuesta de juego</p>   
+            <p style="text-align: center ; margin:10px;  color:Gray", id="textoJugador"> Propuesta de juego</p>   
         </div>
       
         <!-- <div class="center_varios">
             <button class="btn btn-warning center" onclick="pintarMaquinaFichas(true)">Ver Fichas Máquina</button>
             <button class="btn btn-warning center" onclick="ordenarColorMaquinaFichas()">Ordenar por color</button> 
         </div> -->
+        <h2 style="text-align: center"> Fichas Computador </h2>
 
-        <h2>  Fichas Mesa </h2>
-   
+
+
+        <div style="margin: 30px" id="zonaComp" class="center_varios"> 
         </div>
-         <div id="zonaMesa"> </div>
+        <div>
+            <p style="text-align: center ; margin:10px;  color:Gray", id="textoJugador"> Propuesta de juego</p>   
+        </div>
+      
+        <h2 style="text-align: center"> Mesa </h2>
+
+        <div style="margin: 30px" id="zonaMesa" class="center_varios"> 
+        </div>
+    
 
     <script src="rummi313.js"></script>          
 
