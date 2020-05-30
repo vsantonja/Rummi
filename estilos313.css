@@ -9,7 +9,7 @@
         display: inline-block;
         margin: 2px 1px;
         cursor: pointer; 
-     }
+}
 
 .figuraFichaSaco {
         background-color: palegreen;
@@ -18,7 +18,7 @@
         text-align: center;
         font-weight: bold;
         border-radius: 10px;
-        /* border: 1px solid black; */
+        border: 2px solid white;
 }
 
 .figuraFicha{
@@ -28,10 +28,9 @@
         text-align: center;
         font-weight: bold;
         border-radius: 10px;
-        /* border: 1px solid black; */
-        /* display: none; */
-
-}  
+        /* margin: 10px 10px; */
+        border: 2px solid white;
+}
 
 .figuraFichaMaquina {
         background-color:lightblue;
@@ -39,8 +38,8 @@
         height: 40px;
         text-align: center;
         font-weight: bold;
-        border-radius: 10px;
-        /* border: 1px solid black; ¨*/
+        border-radius: 10px;  
+        border: 2px solid white;
 } 
 
 .indice {
@@ -57,17 +56,8 @@
         height: 40px;
         text-align: center;
         font-weight: bold;
-        border-radius: 10px;
-       /* border: 1px solid black; */
-}
-
-.figuraFichaMarcada {
-        background-color:goldenrod;
-        width: 30px;
-        height: 40px;
-        text-align: center;
-        font-weight: bold;
-        border-radius: 10px;
+        border-radius: 10px;  
+        border: 2px solid white;
 }
 
 .filaMesaSeleccionada  {
