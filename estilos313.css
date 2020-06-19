@@ -60,14 +60,16 @@
         border: 2px solid white;
 }
 
-.filaMesaSeleccionada  {
+.fichaMesaSelec{
         background-color:goldenrod;
-        /* width: 30px;
+        width: 30px;
         height: 40px;
         text-align: center;
         font-weight: bold;
-        border-radius: 10px; */
+        border-radius: 10px;  
+        border: 2px solid white;
 }
+
 
 .filaMesaNormal {
         background-color:palegoldenrod;
