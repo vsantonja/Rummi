@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <title>Auto-Rummy</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="autorummy.css">
+  </head>
+  
+<body>
+    
+    <div class="container-fluid">
+        <!-- <h1 style="text-align: center;" >Auto-Rummy</h1>  -->
+         
+
+        <div class="btn-group" style="width:100%">
+            <button  style="width:20%" onclick="nuevoJuego()">Nuevo</button>
+            <button  style="width:20%" onclick="debug()"    id="botonDebug">Debug</button>
+            <button  style="width:20%" onclick="iniciar(0)" id = "botonRepartir">Repartir</button>
+            <button  style="width:20%" onclick="iniciar(1)" id = "botonRepartir1">Rep1</button>
+            <button  style="width:20%" onclick="iniciar(2)" id = "botonRepartir2">Rep2</button>
+        </div> 
+        
+        <div class="btn-group" style="width:100%">
+            <button style="width:20%"  onclick="buscarSeries(true)">Series</button> 
+            <button style="width:20%"  onclick="buscarEscaleras(true)">Escaleras</button> 
+            <button style="width:10%"  onclick="ampliarSerie()"    id="botonAmpS">AmpS</button>
+            <button style="width:10%"  onclick="ampliarEscalera()" id="botonAmpE">AmpE</button>            
+            <button style="width:20%"  onclick="robarFicha(true)"  id ="robarFicha"> Robar</button>
+            <button style="width:20%"  onclick="sugerirJugada()"  id ="Jugada"> Jugada</button></div>
+         </div>
+
+    <div style="margin: 10px" id="zonaSaco" class="center_varios"> 
+        <table id="tablaSaco"></table>
+    </div>
+                
+    <h3 style="text-align: center">  Jugador </h3><br>
+    <div style="margin: 10px" id="zonaJugador" class="center_varios"> 
+        <table id="tablaJugador">  
+            <tr id="filaJugador"></tr>    
+        </table>
+    </div>
+    <div style="text-align: center ; margin:10px;  color:Gray", id="textoJugador"> Propuesta de juego</div> 
+         
+    <div style="margin: 10px" id="zonaMesaRummy" class="center_varios"> 
+        <table id="tablaMesa"> 
+            <tr id="rummy"> 
+            <td class="Rummy" style="color: red;">R</td>    
+            <td class="Rummy" style="color: blue;">U</td>
+            <td class="Rummy" style="color: green;">M</td>
+            <td class="Rummy" style="color: green;">M</td>
+            <td class="Rummy" style="color: orange;">Y</td>
+            </tr>    
+        </table>
+
+        
+        
+    </div>
+
+    <div class="zonaMesa"  id="zonaMesa" class="center_varios"  ondrop="dragDropFin(event)" ondragover="allowDrop(event)" ondragleave="removeStyle(event)">    
+        <br>Arrastre fichas aquí para crear un grupo nuevo <br> o a los extremos de uno de los grupo existentes para ampliarlos. <br>
+    </div>
+        
+    <h3 style="text-align: center" id="letreroComputador"> Computador </h3>
+    <div style="margin: 10px" id="zonaComp" class="center_varios">   
+           <table id="tablaMaquina">   
+               <tr id="filaMaquina"></tr>    
+           </table>
+    </div>
+
+   <script src="autorummy.js"></script>          
+
+</body>
+
+</html>
