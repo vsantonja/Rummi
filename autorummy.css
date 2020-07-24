@@ -21,6 +21,10 @@
   background-color: goldenrod;
 }
 
+.figuraFicha.marcasuave{
+  background-color: rgb(255, 241, 113)
+}
+
 .Rummy{
     /* background-color: rgb(158, 230, 136);   */
     width: 30px;

@@ -27,11 +27,10 @@ function dragDrop(ev) {
   ev.preventDefault(); 
   fichaMovil = hazDropable(fichaMovil);
   fichaMovil.id = "M" + data.substr(1);
-  
+  var filaMesa = ev.target.parentElement;
   if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
-    //si solo había uno en la fila los pongo ordenados
-    var filaMesa = ev.target.parentElement;
-    if (filaMesa.children.length == 1) { 
+    //Si solo había una ficha en la fila las pongo ordenadas
+    if (filaMesa.cells.length == 1) { 
       if ((data.substr(1) - ev.target.id.substr(1)) < 0) {
         filaMesa.insertBefore(fichaMovil, ev.target);
       } else {
@@ -47,7 +46,7 @@ function dragDrop(ev) {
     hazNoDropable(ev.target);
     removeStyle(ev);
     if (validaGrupo(filaMesa) == -1) {
-      var ficha = [...filaMesa.children]
+      var ficha = filaMesa.cells;
       for (let i=0; i< ficha.length; i++) {
         ficha[i].classList.add('error');
         ficha[i].addEventListener("dblclick", retroceder);
@@ -75,9 +74,9 @@ function hazDropable(ficha) {
 }
 
 function hazNoDropable(ficha) {
-  ficha.removeAttribute("ondrop","dragDrop(event)");
-  ficha.removeAttribute("ondragover","allowDrop(event)");
-  ficha.removeAttribute("ondragleave","removeStyle(event)");
+  ficha.removeAttribute("ondrop");
+  ficha.removeAttribute("ondragover");
+  ficha.removeAttribute("ondragleave");
   //ficha.removeAttribute("draggable");
   //ficha.removeAttribute("ondragstart");
   return ficha;
@@ -86,7 +85,7 @@ function hazNoDropable(ficha) {
 function validaGrupo(filaMesa) {
   var arr = [];
   var divMesa = document.getElementById("zonaMesa");
-  if (filaMesa.children.length < 3) {
+  if (filaMesa.cells.length < 3) {
     divMesa.innerHTML = "Siga arrastrando fichas para componer un grupo";
   } else {
     arr =filaAArray(filaMesa);
@@ -238,7 +237,7 @@ function iniciar(prueba) {
       filaSaco.appendChild(figuraFicha);
       i++;
     }  
-    fichasSaco = fichasSaco.concat([...filaSaco.children]);
+    fichasSaco = fichasSaco.concat([...filaSaco.cells]);
     tablaSaco.style.display =  "none";
   }  
   repartirFichas();
@@ -257,11 +256,12 @@ function iniciar(prueba) {
         figuraFicha.id = 'M' + arrayMesa[i][j];
         figuraFicha.style.color = arrayColores[Math.floor(arrayMesa[i][j] / 100)];
         //la primera y última ficha de cada fila son dropables
-        if (j==0 || j == (arrayMesa[i].length-1)) { 
-          figuraFicha = hazDropable(figuraFicha);
-        }
+        // if (j==0 || j == (arrayMesa[i].length-1)) { 
+        //   figuraFicha = hazDropable(figuraFicha);
+        // }
         filaMesa.appendChild(figuraFicha);
       }
+      marcarFilaMesa(filaMesa);
     }
   }
  // solo se reparte una vez. Así que escondo los botones de reparto
@@ -296,13 +296,13 @@ function repartirFichas() {
 
  /******************************************************************************/
  function filaAArray(fila) {
-  return [...fila.children].map(el => el.id.substr(1));
+  return [...fila.cells].map(el => el.id.substr(1));
  }
 
 /******************************************************************************/
 function ordenarFila(arr, fila) {
  
-  var filaArr = [...fila.children];
+  var filaArr = [...fila.cells];
   for (let i =0 ; i < arr.length; i++) {
     filaArr[i].id = "M"+arr[i];
     filaArr[i].innerHTML = arr[i] % 100;
@@ -362,7 +362,7 @@ function obtenerCodigo(arr) {
     if (arr.length == 3){ // si es una S-3 hay que calcular el color excluido
       for (let i = 0; i < 3; i++) {
         if ( Math.floor(arr[i] / 100) != i) {
-          colorExcl = i;
+          colorExcl = i; break;
         }
       }
       codigo = codigo + colorExcl;
@@ -379,21 +379,19 @@ function seleccionarGrupo(a,b) {
   var valorIni = -1; //valor inicial de la escalera
   var tam = 0; // tamaño del grupo
   var groupType = this.getAttribute ("gType"); // Tipo = 'S'|'E'-núm.de grupo-"F"num
-  var numGrupo = this.getAttribute ("numGrupo");
+  var numGrupo =  this.getAttribute ("numGrupo");
   var colorExcl = [0, 1, 2, 3];
   var fichas = [];
- 
 
   if (groupType != 'S' && groupType != 'E' && groupType != 'A' && groupType !='s' && groupType !='e') { //no se ha clicado en una serie o un grupo o ampli
     return;
   }
   
-  fichas = [...filaJugador.children];
+  fichas = [...filaJugador.cells];
 
   if (groupType == 'A') { 
     var grupoMesa = this.getAttribute("grupoMesa");
     var filaMesa = document.getElementById(grupoMesa);
-    //this.className = "figuraFicha";
     this.classList.remove('marcada');
 
     var primero = filaMesa.firstChild;
@@ -489,6 +487,7 @@ function seleccionarGrupo(a,b) {
     document.getElementById("textoJugador").innerHTML = "Propuesta de juego";
     document.getElementById("robarFicha").innerHTML = "Cambiar Turno";
   }
+  marcarFilaMesa(filaMesa);
  }
 
 // ************************************************************************
@@ -506,15 +505,15 @@ function buscarSeries(jugador) {
   var nuevaserie = [];
   var ret = "0";
 
-  var fichasJugador = [...filaJugador.children];
+  var fichasJugador = [...filaJugador.cells];
   // primero, hacemos limpieza
   for(let i = 0; i < fichasJugador.length; i++ ) {
       fichasJugador[i].className = "figuraFicha";
       fichasJugador[i].removeAttribute("gType");
       fichasJugador[i].removeAttribute("numGrupo");
   }     
-  misFichas = [...filaJugador.children].map(el => el.id.substr(1));
-  maqFichas = [...filaMaquina.children].map(el => el.id.substr(1));
+  misFichas = [...filaJugador.cells].map(el => el.id.substr(1));
+  maqFichas = [...filaMaquina.cells].map(el => el.id.substr(1));
   // cambio la codif. dandole prioridad al valor
   var fichas = codifValor(jugador?misFichas:maqFichas);
   ordenar(fichas);
@@ -553,7 +552,7 @@ function buscarSeries(jugador) {
   } 
 
   var tablaMesa = document.getElementById("tablaMesa");
-  var s4Mesa = [...tablaMesa.children].filter(el => el.id.startsWith("S-4"));
+  var s4Mesa = [...tablaMesa.rows].filter(el => el.id.startsWith("S-4"));
   var cont = 0;
   var meVoy = false;
   for (var contS4 = 0; contS4 < s4Mesa.length; contS4++) { 
@@ -625,15 +624,15 @@ function buscarEscaleras(jugador) {
   var ret = "0";
 
   // Limpieza: desmarca, borra el tipo de grupo y el numero de grupo
-  fichasJugador = [...filaJugador.children];
+  fichasJugador = [...filaJugador.cells];
   for (let i =0; i < fichasJugador.length; i++) {
     fichasJugador[i].className = "figuraFicha";
     fichasJugador[i].removeAttribute("gType");
     fichasJugador[i].removeAttribute("numGrupo");
   }
 
-  misFichas = [...filaJugador.children].map(el => parseInt(el.id.substr(1)));
-  maqFichas = Number([...filaMaquina.children].map(el => el.id.substr(1)));
+  misFichas = [...filaJugador.cells].map(el => parseInt(el.id.substr(1)));
+  maqFichas = Number([...filaMaquina.cells].map(el => el.id.substr(1)));
   var fichas = jugador?misFichas:maqFichas;
   ordenar(fichas);
  
@@ -776,41 +775,42 @@ function robarFicha(jugador) {
 function ampliarSerie(jugador){
   var hayAmpliacion = true;
   var iter = 8;
- while (hayAmpliacion && iter) {
+  while (hayAmpliacion && iter) {
     iter--;
-    var hayAmpliacion = false;
-  var tablaMesa = document.getElementById("tablaMesa");
-  var seriesMesa = [...tablaMesa.children].filter(el => el.id.startsWith("S"));
-  var s3Mesa = seriesMesa.filter(el => el.id.split('-')[1] ==3);
-  var hayAmpliacion = false;
-  var filaJugador = document.getElementById("filaJugador");
-  var fichasJugador = [...filaJugador.children];
-  var arr = [];
-  if (s3Mesa.length > 0) {
-    var colores =  s3Mesa.map(el => el.id.split('-')[3]);
-    var valores =  s3Mesa.map(el => el.id.split('-')[2]);
-    for (let i = 0; i < s3Mesa.length; i++) {
-      if (hayAmpliacion) break;
-      for (var j = 0; j < fichasJugador.length; j++) {
-        if ((fichasJugador[j].innerHTML == valores[i]) &&
-           (fichasJugador[j].style.color === arrayColores[colores[i]])) {
-          arr[0] = fichasJugador[j].id.substr(1);
-          var codigoGrupoMesa = "S-3-" + valores[i]+ "-" + colores[i]
-          marcarFichas("A", arr, true, codigoGrupoMesa);
-          hayAmpliacion = true;
-          break;
+    const tablaMesa = document.getElementById("tablaMesa");
+    var seriesMesa = [...tablaMesa.rows].filter(el => el.id.startsWith("S"));
+    var s3Mesa = seriesMesa.filter(el => el.id.split('-')[1] ==3);
+    hayAmpliacion = false;
+    const filaJugador = document.getElementById("filaJugador");
+    var fichasJugador = filaJugador.cells;
+    var arr = [];
+    if (s3Mesa.length > 0) {
+      var colores =  s3Mesa.map(el => el.id.split('-')[3]);
+      var valores =  s3Mesa.map(el => el.id.split('-')[2]);
+      for (let i = 0; i < s3Mesa.length; i++) {
+        if (hayAmpliacion) break;
+        for (var j = 0; j < fichasJugador.length; j++) {
+          if ((fichasJugador[j].innerHTML == valores[i]) &&
+              (fichasJugador[j].style.color === arrayColores[colores[i]])) {
+                // la ficha que amplía una S3 que ya está en la mesa se almacena en un array 
+                // de codigos x color pq así lo exige "marcarFicha"
+            arr[0] = fichasJugador[j].id.substr(1);
+            var codigoGrupoMesa = "S-3-" + valores[i]+ "-" + colores[i]
+            marcarFichas("A", arr, "true", codigoGrupoMesa);
+            hayAmpliacion = true;
+            break;
+          }
         }
       }
     }
   }
-  
-}
- if (hayAmpliacion) { 
-    //  retrasaSeleccion();
-    //  function retrasaSeleccion() {setTimeout(clickEnAmpliaEsc, 2000);}
-    //  function clickEnAmpliaE.call(fichasJugador[j].call(fichasJugador[j])
-  }
-  // if (hayAmpliacion) {ampliarSerie(jugador)}
+ // if (hayAmpliacion) { 
+ //  retrasaSeleccion();
+ //  function retrasaSeleccion() {setTimeout(clickEnAmpliaEsc, 2000);}
+ //  function clickEnAmpliaE.call(fichasJugador[j].call(fichasJugador[j])
+ // }
+ // if (hayAmpliacion) 
+ //   {ampliarSerie(jugador)}
 } 
 
 /************************************************************************************ */
@@ -821,9 +821,9 @@ function ampliarEscalera(jugador){
     iter--;
     var hayAmpliacion = false;
     var tablaMesa = document.getElementById("tablaMesa");
-    var e3Mesa = [...tablaMesa.children].filter(el => el.id.startsWith("E"));
+    var e3Mesa = [...tablaMesa.rows].filter(el => el.id.startsWith("E"));
     var filaJugador = document.getElementById("filaJugador");
-    var fichasJugador = [...filaJugador.children];
+    var fichasJugador = filaJugador.cells;
     var arrVal = [];
     if (e3Mesa.length > 0) {
       var tamanyos =    e3Mesa.map(el => el.id.split('-')[1]); // el tamaño >= 3
@@ -840,7 +840,7 @@ function ampliarEscalera(jugador){
             arrVal[0] = fichasJugador[j].id.substr(1); // marcarFichas() necesita un array
             var codigoGrupoMesa = e3Mesa[i].id;
             var lado = izda?"izda":"dcha";
-            marcarFichas("A", arrVal, true, codigoGrupoMesa, lado);
+            marcarFichas("A", arrVal, "true", codigoGrupoMesa, lado);
             hayAmpliacion = true;
             break;
           }
@@ -912,45 +912,70 @@ function desDuplicador(arr){
 
 // *******************************************************************************************
 // solo se marcan als fichas del jugador ?????
-
+// CUANDO se encuentra un grupo: S3, S4, E3, E4, etc. Se marca visualmente para que
+// el jugador remate haciendo doble click en el grupo marcado
+// groupType: s:serie de 2; e: esc de 2; S: serie > 3; E: esc > 3; A:amplia grupo en mesa
 function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado) {
   var figuraFicha;
-  var s2 = 0
- if (groupType == 's' || groupType == 'e') {s2 = 1;}  // en los duos, el tercer elemento es de la mesa
- for (let i = 0; i < (group.length - s2); i++) {
-   if (jugador) figuraFicha = document.getElementById('F' + group[i]);
-   else figuraFicha = document.getElementById('C' + group[i]);
-   figuraFicha.classList.add('marcada');
-   figuraFicha.setAttribute("gType", groupType);
-   figuraFicha.setAttribute("numGrupo", numGrupo);
-   if (groupType == "A") {
-     figuraFicha.setAttribute("grupoMesa", codigoGrupoMesa); 
-     figuraFicha.setAttribute("lado", lado);
-     var filaMesa = document.getElementById(codigoGrupoMesa);
-   }
-   if (groupType == 's' || groupType == 'e') {
-     // en este caso es el nuevo código de la fila de la mesa implicada
-     figuraFicha.setAttribute("grupoMesa", codigoGrupoMesa); 
-     figuraFicha = document.getElementById('M' + group[group.length-1]);
-     figuraFicha.classList.add('marcada');
-     //figuraFicha.className = "figuraFichaMarcada";
-     figuraFicha.setAttribute("gType", groupType);
-     figuraFicha.setAttribute("numGrupo", numGrupo);
-     if (groupType == 'e') figuraFicha.setAttribute("lado", lado);
-   }
- }
- numGrupo++;
+  const unomenos = 0
+  // en los duos, el tercer elemento es de la mesa
+  if (groupType == 's' || groupType == 'e') {unomenos = 1;}
+  for (let i = 0; i < (group.length - unomenos); i++) {
+    figuraFicha = document.getElementById((jugador?'F':'C') + group[i]);
+    figuraFicha.classList.add('marcada');  //marcado visual
+    figuraFicha.setAttribute("gType", groupType); // s,e,S,E,A
+    figuraFicha.setAttribute("numGrupo", numGrupo); // id único de grupo
+    if (groupType == "A") {
+      figuraFicha.setAttribute("grupoMesa", codigoGrupoMesa); // amplía un grupo en la mesa
+      figuraFicha.setAttribute("lado", lado);
+      var fichasMesa = document.getElementById(codigoGrupoMesa).cells;
+      for (let j = 0; j < fichasMesa.length; j++) {
+        fichasMesa[j].classList.add("marcasuave");
+      }
+    }
+    if (groupType == 's' || groupType == 'e') {
+      // en este caso es el nuevo código de la fila de la mesa implicada
+      figuraFicha.setAttribute("grupoMesa", codigoGrupoMesa); 
+      figuraFicha = document.getElementById('M' + group[group.length-1]);
+      figuraFicha.classList.add('marcada');
+      figuraFicha.setAttribute("gType", groupType);
+      figuraFicha.setAttribute("numGrupo", numGrupo);
+      if (groupType == 'e') figuraFicha.setAttribute("lado", lado);
+    }
+  }
+  numGrupo++;
 }
-/*********************************************************************************** */
-function sugerirJugada() {
-  var bs = buscarSeries(true);
-  var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
-  var be = buscarEscaleras(true);
-  var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
-  if (ne > ns) buscarEscaleras(true);
-  else buscarSeries(true);
+  /*********************************************************************************** */
+  function sugerirJugada() {
+    var bs = buscarSeries(true);
+    var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
+    var be = buscarEscaleras(true);
+    var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
+    if (ne > ns) buscarEscaleras(true);
+    else buscarSeries(true);
 
-  //if (ne == 0 && ns == 0)
+    //if (ne == 0 && ns == 0)
 
   
 }
+
+
+function marcarFilaMesa(fila) {
+  var fichas = fila.cells;
+
+  for (let i=0; i< fichas.length; i++) {
+    fichas[i].classList.remove('error', 'marcada', 'over', 'marcasuave');
+    hazNoDropable(fichas[i]);
+  }
+
+  if (!fila.id.startsWith("S-4")) { 
+    if (fichas[0].innerHTML != "1") {
+      hazDropable(fichas[0]);
+    }
+    if (fichas[fichas.length-1].innerHTML != "13") {
+      hazDropable(fichas[fichas.length-1]);
+    }
+  }
+    
+}  
+
