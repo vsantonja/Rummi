@@ -21,7 +21,7 @@
             <button  style="width:20%" onclick="debug()"    id="botonDebug">Debug</button>
             <button  style="width:20%" onclick="iniciar(0)" id = "botonRepartir">Repartir</button>
             <button  style="width:20%" onclick="iniciar(1)" id = "botonRepartir1">Rep1</button>
-            <button  style="width:20%" onclick="iniciar(2)" id = "botonRepartir2">Rep2</button>
+            <button  style="width:20%" onclick="desmarcar()" id = "desmarcar">Desmarcar</button>
         </div> 
         
         <div class="btn-group" style="width:100%">
@@ -51,14 +51,11 @@
             <td class="Rummy" style="color: red;">R</td>    
             <td class="Rummy" style="color: blue;">U</td>
             <td class="Rummy" style="color: green;">M</td>
-            <td class="Rummy" style="color: green;">M</td>
+            <td class="Rummy" style="color: lightgreen;">M</td>
             <td class="Rummy" style="color: orange;">Y</td>
             </tr>    
         </table>
-
-        
-        
-    </div>
+    </div> 
 
     <div class="zonaMesa"  id="zonaMesa" class="center_varios"  ondrop="dragDropFin(event)" ondragover="allowDrop(event)" ondragleave="removeStyle(event)">    
         <br>Arrastre fichas aquí para crear un grupo nuevo <br> o a los extremos de uno de los grupo existentes para ampliarlos. <br>

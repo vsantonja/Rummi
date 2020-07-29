@@ -1,6 +1,7 @@
 const arrayColores = ["black", "red", "blue", "magenta"];
 var filaMesa;
 var arrayMesa;
+var fm;
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -12,15 +13,37 @@ var arrayMesa;
 /*****************************************************************************/
 /*****************************************************************************/
 
-function allowDrop(ev) { 
-  ev.preventDefault();
-  ev.target.classList.add('over');
-}
+// function allowDrop(ev) { 
+//   ev.preventDefault();
+//   ev.target.classList.add('over');
+// }
 
 function dragStart(ev) { 
   ev.dataTransfer.setData("text", ev.target.id);
-} 
+  fm=ev.target.id;
+}
+
+
+///////////////////////////////////////////////////////////////////
+
+function allowDrop(ev) { 
+  //ev.preventDefault();
+  var fichaMovil = document.getElementById(fm);
+  var filaMesa = ev.target.parentElement;
+  var arrSim = [];
+  if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
+    arrSim = filaAArray(filaMesa);
+    arrSim = arrSim.concat(fichaMovil.id.substr(1)); 
+  }
+  if (validaSim(arrSim) != -1) {
+    ev.preventDefault();
+    ev.target.classList.add('over');
+  }
+  }
+
   
+/////////////////////////////////////////////////////////////////////
+
 function dragDrop(ev) { 
   var data = ev.dataTransfer.getData("text");
   var fichaMovil = document.getElementById(data);
@@ -67,7 +90,9 @@ function dragDrop(ev) {
 function hazDropable(ficha) {
   ficha.setAttribute("ondrop","dragDrop(event)");
   ficha.setAttribute("ondragover","allowDrop(event)");
+  //ficha.setAttribute("ondragenter","allowDrop(event)");
   ficha.setAttribute("ondragleave","removeStyle(event)");
+
   //ficha.removeAttribute("draggable");
   //ficha.removeAttribute("ondragstart");
   return ficha;
@@ -106,6 +131,22 @@ function validaGrupo(filaMesa) {
     }
   }  
 } 
+
+////////////////////////////////////////////////////////////////
+
+function validaSim(arrSim) {
+  if (arrSim.length >= 3 && !esSerie(arrSim) && !esEscalera(arrSim)) {
+     return -1;
+  }
+  if (arrSim.length == 2) {
+    if (arrSim[0] == arrSim[1]) {return -1;}
+    else 
+    if (Math.floor(arrSim[0]) != Math.floor(arrSim[1])) {return -1;}
+  }
+}  
+
+
+/////////////////////////////////////////////////////////////////
 
 function dragDropFin(ev) { 
     ev.preventDefault(); 
@@ -267,7 +308,6 @@ function iniciar(prueba) {
  // solo se reparte una vez. Así que escondo los botones de reparto
   document.getElementById("botonRepartir" ).style.visibility = "hidden";  
   document.getElementById("botonRepartir1").style.visibility = "hidden";  
-  document.getElementById("botonRepartir2").style.visibility = "hidden";
 }
 
 
@@ -326,19 +366,19 @@ function esSerie(arr) {
    var valor = arr.map(el => el % 100);
   
    for (let i = 0; i < arr.length-1; i++) {
-    if ((valor[i] != valor[i+1]) || (color[i] != color[i+1]+1)) {
+    if ((valor[i] != valor[i+1]) || (color[i] != color[i+1] - 1)) {
       return false;
      }
   }
+  return true
 }
 
  /******************************************************************************/
 function esEscalera(arr) {
   var esc = true;
+  ordenar(arr);
   var color= arr.map(el => Math.floor(el / 100));
   var valor = arr.map(el => el % 100);
-
-  ordenar(arr);
   for (let i = 0; i < arr.length-1; i++) {
    if (valor[i] != valor[i+1] - 1) {
      esc = false;
@@ -372,7 +412,7 @@ function obtenerCodigo(arr) {
 }
 
 /******************************************************************************** */
-function seleccionarGrupo(a,b) {
+function seleccionarGrupo() {
   var codGrupo; // Código del grupo
   var colorEsc; // la Escalera es monocolor, luego esto es un entero de 0 a 3
   var colorSer; // la serie de 3 le falta un color (de 0 a 3), a la de 4 ninguno (-1)
@@ -440,18 +480,18 @@ function seleccionarGrupo(a,b) {
       fichas[i].removeAttribute("numGrupo");
       fichas[i].id ='M' + fichas[i].id.substr(1);
       // deja dropables los extremos de la fila de la mesa (cuando se pueda)
-      if (tam == 1) {
-        hazDropable(fichas[i])
-        var recordaI = i;
-      }
-      if (tam == 3) {
-        hazDropable(fichas[i])
-      }
-      if (tam == 4) {
-        hazNoDropable(fichas[i-1]);
-        if (groupType != "S") {hazDropable(fichas[i])}
-        else (hazNoDropable(fichas[recordaI]));
-      }
+      // if (tam == 1) {
+      //   hazDropable(fichas[i])
+      //   var recordaI = i;
+      // }
+      // if (tam == 3) {
+      //   hazDropable(fichas[i])
+      // }
+      // if (tam == 4) {
+      //   hazNoDropable(fichas[i-1]);
+      //   if (groupType != "S") {hazDropable(fichas[i])}
+      //   else (hazNoDropable(fichas[recordaI]));
+      // }
 
       // las series de 4 no se pueden ampliar
       //nuevoCodigoS3Mesa = 
@@ -581,7 +621,12 @@ function buscarSeries(jugador) {
    if (jugador) filaJugador.appendChild(figuraFicha);
    else filaMaquina.appendChild(figuraFicha);
   } 
+  // códigos de retorno de buscarSerie (para toma de decisiones):
+  // "S-4": lo + grande que hay son una o varias series de 4
+  // "S-3": lo + grande que hay son una o varias series de 3
+  // "S-2": lo + grande que hay son una o varias series de 2 que se pueden completar con una ficha del la mesa
 
+  
   var textoJ = document.getElementById("textoJugador");
   if (cuentaS3 > 0) {
     var serMax = series.map(el => el.length).sort((a, b) => b - a)[0];
@@ -685,6 +730,11 @@ function buscarEscaleras(jugador) {
     figuraFicha= document.getElementById('F' + arr[i]);
     filaJugador.appendChild(figuraFicha);
   }
+// códigos de retorno de buscarEscaleras (para toma de decisiones):
+  // "E-n": lo + grande que hay son una o varias esc de n
+  // "E-2": lo + grande que hay son una o varias esc de 2 
+  // que se pueden completar con una ficha del la mesa
+
   var escMax = escalera.map(el => el.length).sort((a, b) => b - a)[0];
   if (cuentaE3 > 0) {
     for (let i = 0; i < cuentaE3; i++) {
@@ -804,15 +854,13 @@ function ampliarSerie(jugador){
       }
     }
   }
- // if (hayAmpliacion) { 
- //  retrasaSeleccion();
- //  function retrasaSeleccion() {setTimeout(clickEnAmpliaEsc, 2000);}
- //  function clickEnAmpliaE.call(fichasJugador[j].call(fichasJugador[j])
- // }
- // if (hayAmpliacion) 
- //   {ampliarSerie(jugador)}
-} 
-
+  if (hayAmpliacion) { 
+  retrasaSeleccionSer();
+  function retrasaSeleccionSer() {setTimeout(clickEnAmpliaSer, 2000);}
+  function clickEnAmpliaSer(){seleccionarGrupo.call(fichasJugador[j])}
+  }
+}
+ 
 /************************************************************************************ */
 function ampliarEscalera(jugador){
   var hayAmpliacion = true;
@@ -848,10 +896,10 @@ function ampliarEscalera(jugador){
       }
     }
     if (hayAmpliacion) { 
-      seleccionarGrupo.call(fichasJugador[j]);
-      // retrasaSeleccion();
-      // function retrasaSeleccion() {setTimeout(clickEnAmpliaEsc, 2000);}
-      // function clickEnAmpliaEsc(){seleccionarGrupo.call(fichasJugador[j])}
+      //seleccionarGrupo.call(fichasJugador[j]);
+      retrasaSeleccionEsc();
+      function retrasaSeleccionEsc() {setTimeout(clickEnAmpliaEsc, 2000);}
+      function clickEnAmpliaEsc(){seleccionarGrupo.call(fichasJugador[j])}
     }
   }
 }
@@ -953,21 +1001,17 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado) {
     var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
     if (ne > ns) buscarEscaleras(true);
     else buscarSeries(true);
+  //if (ne == 0 && ns == 0)
 
-    //if (ne == 0 && ns == 0)
-
-  
 }
 
 
 function marcarFilaMesa(fila) {
   var fichas = fila.cells;
-
   for (let i=0; i< fichas.length; i++) {
     fichas[i].classList.remove('error', 'marcada', 'over', 'marcasuave');
     hazNoDropable(fichas[i]);
   }
-
   if (!fila.id.startsWith("S-4")) { 
     if (fichas[0].innerHTML != "1") {
       hazDropable(fichas[0]);
@@ -976,6 +1020,8 @@ function marcarFilaMesa(fila) {
       hazDropable(fichas[fichas.length-1]);
     }
   }
-    
+
+  
+  function desmarcar(){};
 }  
 
