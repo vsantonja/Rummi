@@ -26,20 +26,22 @@ function dragStart(ev) {
 
 ///////////////////////////////////////////////////////////////////
 
+//Asociado al evento dragover
 function allowDrop(ev) { 
-  //ev.preventDefault();
   var fichaMovil = document.getElementById(fm);
   var filaMesa = ev.target.parentElement;
-  var arrSim = [];
+  var arr = [];
   if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
-    arrSim = filaAArray(filaMesa);
-    arrSim = arrSim.concat(fichaMovil.id.substr(1)); 
+    arr = filaFichasAArrayCodigos(filaMesa);
+    arr = arr.concat(fichaMovil.id.substr(1)); 
   }
-  if (validaSim(arrSim) != -1) {
+  if (validaSim(arr) != -1) {
     ev.preventDefault();
     ev.target.classList.add('over');
+  } else {
+    ev.target.classList.add('error');
   }
-  }
+}
 
   
 /////////////////////////////////////////////////////////////////////
@@ -48,11 +50,11 @@ function dragDrop(ev) {
   var data = ev.dataTransfer.getData("text");
   var fichaMovil = document.getElementById(data);
   ev.preventDefault(); 
-  fichaMovil = hazDropable(fichaMovil);
+  //fichaMovil = hazDropable(fichaMovil);
   fichaMovil.id = "M" + data.substr(1);
-  var filaMesa = ev.target.parentElement;
   if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
     //Si solo había una ficha en la fila las pongo ordenadas
+    var filaMesa = ev.target.parentElement;
     if (filaMesa.cells.length == 1) { 
       if ((data.substr(1) - ev.target.id.substr(1)) < 0) {
         filaMesa.insertBefore(fichaMovil, ev.target);
@@ -60,41 +62,25 @@ function dragDrop(ev) {
         filaMesa.appendChild(fichaMovil); 
       }
     // si en la fila había 2 o más fichas
-    } else if (ev.target === (filaMesa.firstElementChild)) {
-      filaMesa.insertBefore(fichaMovil, ev.target);
-    } else {
-      filaMesa.appendChild(fichaMovil);
-    }     
-    ev.target.className = "figuraFicha";
+    } //else if (ev.target === (filaMesa.firstElementChild)) {
+    else if (ev.target.innerHTML < filaMesa.firstElementChild.innerHTML) {
+        filaMesa.insertBefore(fichaMovil, ev.target);
+      } else {
+         filaMesa.appendChild(fichaMovil);
+      }     
+    ev.target.classList.remove('error', 'marcada', 'over', 'marcasuave');
     hazNoDropable(ev.target);
     removeStyle(ev);
-    if (validaGrupo(filaMesa) == -1) {
-      var ficha = filaMesa.cells;
-      for (let i=0; i< ficha.length; i++) {
-        ficha[i].classList.add('error');
-        ficha[i].addEventListener("dblclick", retroceder);
-      }
-      function retroceder() {
-        for (let i=0; i< ficha.length; i++) {
-          document.getElementById("filaJugador").appendChild(ficha[i]);
-          ficha[i].id = "F" + ficha[i].id.substr(1);
-          ficha[i].classList.remove('error');
-          ficha[i].draggable = "true";
-        }
-      }
-    }
-  } 
+  }
+  marcarFilaMesa(filaMesa);
   removeDragParams(ev, fichaMovil);
 }
 
 function hazDropable(ficha) {
   ficha.setAttribute("ondrop","dragDrop(event)");
   ficha.setAttribute("ondragover","allowDrop(event)");
-  //ficha.setAttribute("ondragenter","allowDrop(event)");
   ficha.setAttribute("ondragleave","removeStyle(event)");
-
-  //ficha.removeAttribute("draggable");
-  //ficha.removeAttribute("ondragstart");
+  //ficha.setAttribute("ondragenter","allowDrop(event)");
   return ficha;
 }
 
@@ -102,8 +88,6 @@ function hazNoDropable(ficha) {
   ficha.removeAttribute("ondrop");
   ficha.removeAttribute("ondragover");
   ficha.removeAttribute("ondragleave");
-  //ficha.removeAttribute("draggable");
-  //ficha.removeAttribute("ondragstart");
   return ficha;
 }
 
@@ -113,7 +97,7 @@ function validaGrupo(filaMesa) {
   if (filaMesa.cells.length < 3) {
     divMesa.innerHTML = "Siga arrastrando fichas para componer un grupo";
   } else {
-    arr =filaAArray(filaMesa);
+    arr =filaFichasAArrayCodigos(filaMesa);
     if (esSerie(arr)){ 
       filaMesa.id=obtenerCodigo(arr);
       divMesa.innerHTML = "GRUPO VÁLIDO.Siga arrastrando fichas para componer otra grupo";
@@ -134,16 +118,21 @@ function validaGrupo(filaMesa) {
 
 ////////////////////////////////////////////////////////////////
 
-function validaSim(arrSim) {
-  if (arrSim.length >= 3 && !esSerie(arrSim) && !esEscalera(arrSim)) {
+function validaSim(arr) {
+  var len = arr.length;
+  if (len >= 3 && !esSerie(arr) && !esEscalera(arr)) {
      return -1;
   }
-  if (arrSim.length == 2) {
-    if (arrSim[0] == arrSim[1]) {return -1;}
-    else 
-    if (Math.floor(arrSim[0]) != Math.floor(arrSim[1])) {return -1;}
+  if (len == 2) {
+    if ((arr[0] % 100) == (arr[1] % 100)) {
+      if (arr[0] == arr[1]) {return -1;}
+    }
+    else if (Math.abs((arr[0] % 100) - (arr[1] % 100)) == 1) {
+      if (Math.floor(arr[0]  / 100) != Math.floor(arr[1] / 100)) {return -1;}
+    } else {return -1;}
   }
-}  
+}
+  
 
 
 /////////////////////////////////////////////////////////////////
@@ -166,7 +155,7 @@ function dragDropFin(ev) {
 
 function removeStyle(ev) {
   if (ev.target.tagName == "TD"){
-     ev.target.classList.remove('over');  
+     ev.target.classList.remove('over', 'error');  
   }
   else if (ev.target.tagName == "DIV") {}    
 }
@@ -284,7 +273,7 @@ function iniciar(prueba) {
   repartirFichas();
   // Si hay fichas en la mesa, ponlas. Esto solo ocurre en fase de DESARROLLO
   // para reproducir determinados escenarios
-  tablaMesa = document.getElementById("tablaMesa").firstElementChild;
+  var tablaMesa = document.getElementById("tablaMesa").firstElementChild;
   if (arrayMesa)  {      // si está definido en inicio()
     for (let i = 0; i < arrayMesa.length; i++){
       filaMesa = document.createElement("tr");
@@ -335,7 +324,7 @@ function repartirFichas() {
 
 
  /******************************************************************************/
- function filaAArray(fila) {
+ function filaFichasAArrayCodigos(fila) {
   return [...fila.cells].map(el => el.id.substr(1));
  }
 
@@ -365,33 +354,27 @@ function esSerie(arr) {
    var color = arr.map(el => Math.floor(el / 100));
    var valor = arr.map(el => el % 100);
   
-   for (let i = 0; i < arr.length-1; i++) {
-    if ((valor[i] != valor[i+1]) || (color[i] != color[i+1] - 1)) {
-      return false;
-     }
+  for (let i = 0; i < arr.length-1; i++) {
+    if (valor[i] != valor[i+1]) {return false;}
+    else if (color[i] == color[i+1]) {return false;}
   }
   return true
 }
 
  /******************************************************************************/
 function esEscalera(arr) {
-  var esc = true;
   ordenar(arr);
   var color= arr.map(el => Math.floor(el / 100));
   var valor = arr.map(el => el % 100);
   for (let i = 0; i < arr.length-1; i++) {
-   if (valor[i] != valor[i+1] - 1) {
-     esc = false;
-    }
-    if (color[i] != color[i+1]) {
-      esc = false;
-    }
- }
- return esc;
+    if (valor[i] != valor[i+1] - 1) {return false;}
+    if (color[i] != color[i+1]) {return false;}
+  }
+ return true;
 }
 
 // ********************************************************************************************
-// Obtiene el código del grupo que hay en la Mesa. Se supone que el aarray que se pasa
+// Obtiene el código del grupo que hay en la Mesa. Se supone que el array que se pasa
 // contiene una Serie o una Escalera en codifificacion "xColor" y ordenada  
 function obtenerCodigo(arr) {
   var colorExcl = 3;
@@ -420,6 +403,7 @@ function seleccionarGrupo() {
   var tam = 0; // tamaño del grupo
   var groupType = this.getAttribute ("gType"); // Tipo = 'S'|'E'-núm.de grupo-"F"num
   var numGrupo =  this.getAttribute ("numGrupo");
+  var grupoMesa = this.getAttribute ("grupoMesa");
   var colorExcl = [0, 1, 2, 3];
   var fichas = [];
 
@@ -430,9 +414,10 @@ function seleccionarGrupo() {
   fichas = [...filaJugador.cells];
 
   if (groupType == 'A') { 
-    var grupoMesa = this.getAttribute("grupoMesa");
-    var filaMesa = document.getElementById(grupoMesa);
-    this.classList.remove('marcada');
+  //  var grupoMesa = this.getAttribute("grupoMesa");
+  var filaMesa =  document.getElementById(grupoMesa);
+
+    ////this.classList.remove('marcada');
 
     var primero = filaMesa.firstChild;
     this.setAttribute("numGrupo", primero.getAttribute("numGrupo"));
@@ -462,9 +447,9 @@ function seleccionarGrupo() {
     this.removeAttribute("numGrupo");
     this.removeAttribute("grupoMesa");
   } else { //groupTypes S y E
-    document.getElementById("TablaMesa");
-    filaMesa = document.createElement("tr");
-    tablaMesa.appendChild(filaMesa);
+    var tablaMesa = document.getElementById("tablaMesa");
+    filaM = document.createElement("tr");
+    tablaMesa.appendChild(filaM);
 
   // recorro la fichas del panel del jugador-comp para ver las que forman parte de mi grupo
   for (let i = 0; i < fichas.length; i++) {
@@ -473,47 +458,30 @@ function seleccionarGrupo() {
       delete colorExcl[colorExcl.indexOf(color)];
       if (valorIni == -1) {valorIni = fichas[i].innerHTML;}
       tam++;
-      filaMesa.appendChild(fichas[i]);
+      filaM.appendChild(fichas[i]);
       fichas[i].classList.remove('marcada');
-     // fichas[i].className ="figuraFicha";
       fichas[i].removeAttribute("gType");
       fichas[i].removeAttribute("numGrupo");
       fichas[i].id ='M' + fichas[i].id.substr(1);
-      // deja dropables los extremos de la fila de la mesa (cuando se pueda)
-      // if (tam == 1) {
-      //   hazDropable(fichas[i])
-      //   var recordaI = i;
-      // }
-      // if (tam == 3) {
-      //   hazDropable(fichas[i])
-      // }
-      // if (tam == 4) {
-      //   hazNoDropable(fichas[i-1]);
-      //   if (groupType != "S") {hazDropable(fichas[i])}
-      //   else (hazNoDropable(fichas[recordaI]));
-      // }
-
       // las series de 4 no se pueden ampliar
       //nuevoCodigoS3Mesa = 
-      filaMesa.id = "S-3-"
+      filaM.id = "S-3-"
     } 
   }
     if (groupType == 's'|| groupType == 'e')  {
-      var primero2 = filaMesa.firstChild;
-      fichaMesa = [...document.getElementsByClassName('fichaMesaSelec')]; // solo PUEDE haber 1
-      if (fichaMesa[0].getAttribute('lado') == 'izda') {
-        filaMesa.insertBefore(fichaMesa[0], primero2);
+      fichaMesa = [...document.getElementsByClassName('marcasuave')]; 
+      fichaMesa = fichaMesa.filter(el => el.getAttribute('numGrupo') == numGrupo );// solo PUEDE haber 1
+      filaVella = fichaMesa[0].parentElement;
+      if (fichaMesa[0].getAttribute('lado') == 'izda') {  // es 'e'
+        filaM.insertBefore(fichaMesa[0], filaM.firstChild);
       } else {
-      //fichaMesa[0].parentElement.id 
-      
-      
-      filaMesa.appendChild(fichaMesa[0]);
+        filaM.appendChild(fichaMesa[0]);
       }
-      fichaMesa[0].classList.remove("marcada")
-     // fichaMesa[0].className = "figuraFicha";
+      //fichaMesa[0].parentElement.id = obtenerCodigo(filaFichasAArrayCodigos(fichaMesa[0].parentElement));
+      marcarFilaMesa(filaVella);
+      //fichaMesa[0].classList.remove("marcasuave");
       fichaMesa[0].grup = "S";
-      //filAMesa.id ="S-3-" + valorIni + "-" color
-
+      //filaM.id ="S-3-" + valorIni + "-" + color;
     }
 
     if (groupType == "S") {
@@ -523,11 +491,11 @@ function seleccionarGrupo() {
       colorEsc = color;
       codGrupo = "E-" + tam + "-" + valorIni + "-" + colorEsc;
     }
-    filaMesa.id = codGrupo;
+    filaM.id = codGrupo;
     document.getElementById("textoJugador").innerHTML = "Propuesta de juego";
     document.getElementById("robarFicha").innerHTML = "Cambiar Turno";
   }
-  marcarFilaMesa(filaMesa);
+  marcarFilaMesa(filaM);
  }
 
 // ************************************************************************
@@ -539,20 +507,16 @@ function buscarSeries(jugador) {
   var valorS2 = [];
   
   var tamSer = [];
-  var fichas2 = [];
-  var series = []; // seriers de 3 o 4 fi fichas
+  var fichasPost = [];
+  var series = []; // seriers de 3 o 4 fichas
   var s2 = []; // proto series de 2 fichas
   var nuevaserie = [];
   var ret = "0";
 
   var fichasJugador = [...filaJugador.cells];
   // primero, hacemos limpieza
-  for(let i = 0; i < fichasJugador.length; i++ ) {
-      fichasJugador[i].className = "figuraFicha";
-      fichasJugador[i].removeAttribute("gType");
-      fichasJugador[i].removeAttribute("numGrupo");
-  }     
-  misFichas = [...filaJugador.cells].map(el => el.id.substr(1));
+  limpiaFila(fichasJugador);
+  misFichas = fichasJugador.map(el => el.id.substr(1));
   maqFichas = [...filaMaquina.cells].map(el => el.id.substr(1));
   // cambio la codif. dandole prioridad al valor
   var fichas = codifValor(jugador?misFichas:maqFichas);
@@ -574,7 +538,7 @@ function buscarSeries(jugador) {
     }
     ordenar(grupoValor[n]); // ordeno los grupos para que los dups se vayan al final
     // y reconstruyo el array fichas
-    fichas2 = fichas2.concat(grupoValor[n]);
+    fichasPost = fichasPost.concat(grupoValor[n]);
     tamSer[n] = grupoValor[n].length - cuentaDups;
     grupoValorSinDups[n] = grupoValor[n].slice(0, tamSer[n]);
     // si el grupo de valor n (sin dups) es de 3 o 4 fichas? ==> es una serie
@@ -615,8 +579,8 @@ function buscarSeries(jugador) {
   }
  
  // representar las fichas ordenadas 
-  var arr  = codifColor(fichas2,true);
-  for (let i = 0; i < fichas2.length; i++) {
+  var arr  = codifColor(fichasPost,true);
+  for (let i = 0; i < fichasPost.length; i++) {
     figuraFicha= document.getElementById('F' + arr[i]);
    if (jugador) filaJugador.appendChild(figuraFicha);
    else filaMaquina.appendChild(figuraFicha);
@@ -659,7 +623,7 @@ function buscarSeries(jugador) {
 // Esta función busca escaleras cuyos compenentes sean del mismo color
 function buscarEscaleras(jugador) {
   var du = [];
-  var fichas2 = [];
+  var fichasPost = [];
   var escalera = [];
   var grupoColor = [];
   var esc2 = [];
@@ -670,12 +634,8 @@ function buscarEscaleras(jugador) {
 
   // Limpieza: desmarca, borra el tipo de grupo y el numero de grupo
   fichasJugador = [...filaJugador.cells];
-  for (let i =0; i < fichasJugador.length; i++) {
-    fichasJugador[i].className = "figuraFicha";
-    fichasJugador[i].removeAttribute("gType");
-    fichasJugador[i].removeAttribute("numGrupo");
-  }
-
+  limpiaFila(fichasJugador);
+  
   misFichas = [...filaJugador.cells].map(el => parseInt(el.id.substr(1)));
   maqFichas = Number([...filaMaquina.cells].map(el => el.id.substr(1)));
   var fichas = jugador?misFichas:maqFichas;
@@ -693,21 +653,21 @@ function buscarEscaleras(jugador) {
         cont++;
       }
     }
-      du[c] = cont;
-      ordenar(grupoColor[c]);   // los grupos de color c ya etaban ordenados
-                                // esto es para enviar los dups al final del grupo
+    du[c] = cont;
+    ordenar(grupoColor[c]);   // los grupos de color c ya etaban ordenados
+                              // esto es para enviar los dups al final del grupo
 
-    // cvoy recomponiendo el array fichas del jugador o el computador
-    fichas2 = fichas2.concat(grupoColor[c]);
+    // voy recomponiendo el array fichas del jugador o el computador
+    fichasPost = fichasPost.concat(grupoColor[c]);
     
     var ini = 0;
     var tam = 1;
-    var limite = grupoColor[c].length - du[c];
+    var lim = grupoColor[c].length - du[c];
 
     // recorro el arr grupoColor[c] (sin dups) buscando escaleras
     // una especie de parser que localiza escaleras
-    for (let i = 1; i <= limite; i++) {
-      if (grupoColor[c][i] != grupoColor[c][i - 1] + 1 || i == limite) {
+    for (let i = 1; i <= lim; i++) {
+      if (grupoColor[c][i] != grupoColor[c][i - 1] + 1 || i == lim) {
         if (tam == 2) {
           col2[cuentaE2] = c;
           esc2[cuentaE2++] = grupoColor[c].slice(ini, ini+2);
@@ -721,12 +681,10 @@ function buscarEscaleras(jugador) {
     
     } 
   }
-  
-  //if (jugador || modoDebug) pintarFichas(fichas2, jugador);
   var textoJ = document.getElementById("textoJugador");
-  var arr  = desDuplicador(fichas2); // quita el +20 en los dups (ya no hace falta)
+  var arr  = desDuplicador(fichasPost); // quita el +20 en los dups (ya no hace falta)
   // redibujo las fichas de Jugador o computador
-  for (let i = 0; i < fichas2.length; i++) {
+  for (let i = 0; i < fichasPost.length; i++) {
     figuraFicha= document.getElementById('F' + arr[i]);
     filaJugador.appendChild(figuraFicha);
   }
@@ -745,67 +703,78 @@ function buscarEscaleras(jugador) {
       }
     }
   } else if (cuentaE2 > 0) {
+    var gruposMesa = [...document.getElementById("tablaMesa").rows];
     for (let i = 0; i < cuentaE2; i++) {
       // para las esc de 2 elementos busco en la mesa una serie de 4 on una escalera de 
       // 4 o 5 o 6 ...al que el pueda quitar la ficha que me falta: por la izda o 
       // por la dcha. Las fichas que busco son las siguientes:
       var fichaIzda;
       var fichaDcha;
-      if (esc2[i][0] % 100 == 1) fichaIzda = -1;  // no hay ficha a la izda
-      else fichaIzda = esc2[i][0] - 1;
+      if (esc2[i][0] % 100 == 1) {fichaIzda = -1;}  // no hay ficha a la izda
+      else {fichaIzda = esc2[i][0] - 1;}
 
       if (esc2[i][1] % 100 == 13) fichaDcha = -1; // no hay ficha a la dcha
       else fichaDcha =parseInt(esc2[i][1]) + parseInt(1);
       // intento de ver si la fichaIzda está en la mesa
       posibleFichaIzda = document.getElementById("M" + fichaIzda);
-      if (posibleFichaIzda) {
+      posibleFichaDcha = document.getElementById("M" + fichaDcha);
+      var fichaAmover;
+      var porIzda = false;
+      var porDcha = false;
+      if (posibleFichaIzda || posibleFichaDcha) {
         // si que esta, vamos a ver si esta en un lugar aprovechable
-        var cgm;
-        var filaId = posibleFichaIzda.parentElement.id;
-        var esS4 = filaId.startsWith("S-4-");
-        var esE = filaId.startsWith("E-");
-        var mayorQue3 = (filaId.split("-")[1] > 3);
-        var porIzda =(filaId.split("-")[2] - 1 ==  fichaIzda%100);
-        var porDcha = ((parseInt(filaId.split("-")[2])+parseInt(filaId.split("-")[1])-1)  == fichaIzda%100);
-      if ( esS4 || (esE && mayorQue3 && (porIzda || porDcha))) {
-      //if (esE) {
-        esc2[i][2] = fichaIzda;
-        if (esE) cgm = "E-" + (filaId.split("-")[1]-1) + "-";
-        marcarFichas("e", esc2[i], jugador, cgm,"izda");
-        
+        for (let f = 0; f < gruposMesa.length; f++) {
+          var fichasMesa = [...gruposMesa[f].cells];
 
-    
-      //alert ("escalera de 2 completable por la izda.");
-      textoJ.innerHTML = "Juega la escalera marcada (2 fichas) junto a una ficha de la mesa";
-    } else {
-      // si que esta, vamos a ver si esta en un lugar aprovechable
-        var cgm;
-        posibleFichaDcha = document.getElementById("M" + fichaDcha);
-        if (posibleFichaDcha) {
-          var filaId = posibleFichaDcha.parentElement.id;
-          var esS4 = filaId.startsWith("S-4-");
-          var esE = filaId.startsWith("E-");
-          var mayorQue3 = (filaId.split("-")[1] > 3);
-          var porIzda =(filaId.split("-")[2] - 1 ==  fichaIzda%100);
-          var porDcha = ((parseInt(filaId.split("-")[2])+parseInt(filaId.split("-")[1])-1)  == fichaIzda%100);
-          if ( esS4 || (esE && mayorQue3 && (porIzda || porDcha))) {
-            //if (esE) {
-              esc2[i][2] = fichaDcha;
-              if (esE) cgm = "E-" + (filaId.split("-")[1]-1) + "-";
-              marcarFichas("e", esc2[i], jugador, cgm, "dcha");
-      
+          if (fichasMesa[0].id.substr(1) == fichaIzda) {
+            fichaAmover = fichasMesa[0];
+            porIzda = true;
+          } else if (fichasMesa[fichasMesa.length-1].id.substr(1) == fichaIzda) {
+            fichaAmover = fichasMesa[fichasMesa.length-1];
+            porIzda = true
+          } else if (fichasMesa[0].id.substr(1) == fichaDcha) {
+            fichaAmover = fichasMesa[0];
+            porDcha = true;
+          } else if (fichasMesa[fichasMesa.length-1].id.substr(1) == fichaDcha) {
+            fichaAmover = fichasMesa[fichasMesa.length-1];
+            porDcha = true
+          } else {
+            fichaAmover = null;
+            porDcha = false;
+            porIzda = false
+          }
+          if (fichaAmover) {
+            var cgm;
+            var esS4 = gruposMesa[f].id.startsWith("S-4-");
+            var esE = gruposMesa[f].id.startsWith("E-");
+            var mayorQue3 = (gruposMesa[f].id.split("-")[1] > 3);
+            if ( esS4 || (esE && mayorQue3)) {
+              esc2[i][2] =  fichaAmover.id.substr(1);
+              if (esE) cgm = "E-" + (gruposMesa[f].id.split("-")[1]-1) + "-";
+              marcarFichas("e", esc2[i], jugador, cgm, (porIzda)?"izda":"dcha",fichaAmover);
+            }
+          }
         }
+      
         textoJ.innerHTML = "Juega la escalera marcada (2 fichas) junto a una ficha de la mesa";
         ret = "E-2"
-        } else  {return ret;} 
-        }
-      }
+      } else  {ret = "-1";} 
     }
   } else {textoJ.innerHTML = "No hay ninguna escalera en tu mano";}
   return ret;
 }
 
-/******************************************************************************* */
+
+/* ****************************************************************************** */
+function limpiaFila(fichas) {
+  for (let i = 0; i < fichas.length; i++ ) {
+      fichas[i].classList.remove('error', 'marcada', 'over', 'marcasuave');
+      fichas[i].removeAttribute("gType");
+      fichas[i].removeAttribute("numGrupo");
+  } 
+}    
+
+/* ****************************************************************************** */
 function robarFicha(jugador) {
     if (fichasSaco.length > 0) {
      var figuraFicha = fichasSaco.pop();
@@ -813,11 +782,18 @@ function robarFicha(jugador) {
      figuraFicha.draggable = "true";
      figuraFicha.setAttribute("ondragstart", "dragStart(event)");
      filaJugador.appendChild(figuraFicha);
-
-      //pintarFichas(misFichas, true);
     }
     else alert ("El saco está vacío");
-    //cambioTurno(jugador);
+    var gruposMesa = [...document.getElementById("tablaMesa").rows];
+    for (let i = 0; i < gruposMesa.length; i++) {
+      if (gruposMesa[i].id.startsWith('X')) {
+        var grupo = gruposMesa[i].cells;
+        for (j=0; j < grupo.length; j++) {
+          filaJugador.appendChild(grupo[j])
+          if (grupo.length == 0) gruposMesa.deleteRow(i);
+        }
+      }
+    }
   }
   
 /******************************************************************************/
@@ -899,7 +875,8 @@ function ampliarEscalera(jugador){
       //seleccionarGrupo.call(fichasJugador[j]);
       retrasaSeleccionEsc();
       function retrasaSeleccionEsc() {setTimeout(clickEnAmpliaEsc, 2000);}
-      function clickEnAmpliaEsc(){seleccionarGrupo.call(fichasJugador[j])}
+      function clickEnAmpliaEsc()
+      {seleccionarGrupo.call(fichasJugador[j])}
     }
   }
 }
@@ -963,9 +940,9 @@ function desDuplicador(arr){
 // CUANDO se encuentra un grupo: S3, S4, E3, E4, etc. Se marca visualmente para que
 // el jugador remate haciendo doble click en el grupo marcado
 // groupType: s:serie de 2; e: esc de 2; S: serie > 3; E: esc > 3; A:amplia grupo en mesa
-function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado) {
+function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado, fichaDeLaMesa) {
   var figuraFicha;
-  const unomenos = 0
+  var unomenos = 0
   // en los duos, el tercer elemento es de la mesa
   if (groupType == 's' || groupType == 'e') {unomenos = 1;}
   for (let i = 0; i < (group.length - unomenos); i++) {
@@ -984,8 +961,9 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado) {
     if (groupType == 's' || groupType == 'e') {
       // en este caso es el nuevo código de la fila de la mesa implicada
       figuraFicha.setAttribute("grupoMesa", codigoGrupoMesa); 
-      figuraFicha = document.getElementById('M' + group[group.length-1]);
-      figuraFicha.classList.add('marcada');
+      figuraFicha=fichaDeLaMesa;
+      //figuraFicha = document.getElementById('M' + group[group.length-1]);
+      figuraFicha.classList.add('marcasuave');
       figuraFicha.setAttribute("gType", groupType);
       figuraFicha.setAttribute("numGrupo", numGrupo);
       if (groupType == 'e') figuraFicha.setAttribute("lado", lado);
@@ -1002,26 +980,44 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado) {
     if (ne > ns) buscarEscaleras(true);
     else buscarSeries(true);
   //if (ne == 0 && ns == 0)
-
 }
-
 
 function marcarFilaMesa(fila) {
   var fichas = fila.cells;
-  for (let i=0; i< fichas.length; i++) {
+  for (let i=0; i < fichas.length; i++) {
     fichas[i].classList.remove('error', 'marcada', 'over', 'marcasuave');
     hazNoDropable(fichas[i]);
   }
-  if (!fila.id.startsWith("S-4")) { 
-    if (fichas[0].innerHTML != "1") {
-      hazDropable(fichas[0]);
-    }
-    if (fichas[fichas.length-1].innerHTML != "13") {
-      hazDropable(fichas[fichas.length-1]);
-    }
-  }
+  hazDropable(fichas[0]);
+  hazDropable(fichas[fichas.length-1]);
+}
 
   
-  function desmarcar(){};
-}  
+  function desmarcar() {
+    fichas = [...document.getElementById("filaJugador").cells];
+    for (let i=0; i< fichas.length; i++) {
+      fichas[i].classList.remove('error', 'marcada', 'over', 'marcasuave');
+      fichas[i].removeAttribute("lado");
+      fichas[i].removeAttribute("gType");
+      fichas[i].removeAttribute("numGrupo");
+      fichas[i].removeAttribute("grupoMesa");
+    }
+    [...document.getElementsByClassName('marcasuave')].forEach(el => el.classList.remove('marcasuave'));
+  }
+         
+
+
+function barreja(jugador){
+
+ ficha = [...document.getElementById(FilaJugador)].cells;
+  // series =  buscarSeries(true);
+  // escaleras = buscarEscaleras(true);
+  for (let i=0; i < Filajugador.length; i++) {
+    
+
+
+  }
+  
+
+}
 
