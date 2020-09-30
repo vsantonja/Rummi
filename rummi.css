@@ -1,0 +1,110 @@
+
+.figuraFicha{
+    background-color: palegoldenrod;
+    width: 30px;
+    height: 40px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid white;
+}
+
+.figuraFicha.permiso{
+  background-color: darkgreen;
+}
+
+.figuraFicha.error{
+  background-color: red;
+}
+
+.figuraFicha.marcada{
+  background-color: goldenrod;
+}
+
+.figuraFicha.marcasuave{
+  background-color: rgb(255, 241, 113)
+}
+
+.Rummy{
+    /* background-color: rgb(158, 230, 136);   */
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font-weight: bold;
+    border: 2px solid rgb(158, 230, 136);
+}    
+    
+
+.zonaMesa{
+    background-color: rgb(75, 216, 86);
+    color:  white;
+    height: 40px;
+    text-align: center;
+    /* font-weight: bold; */
+}    
+
+.figuraFichaM {
+        background-color:lightblue;
+        width: 30px;
+        height: 50px;
+        text-align: center;
+        font-weight: bold;
+        border-radius: 10px;  
+        /* border: 2px solid white; */
+} 
+/* 
+.figuraFichaMarcada {
+    background-color:goldenrod;
+    width: 30px;
+    height: 40px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;  
+    border: 2px solid white;
+} */
+
+.figuraProvisional {
+    background-color:lightgreen;
+    width: 30px;
+    height: 40px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;  
+    /* border: 2px solid lightgreen; */
+    /* 
+    color: lightgreen */
+} 
+body {
+        font-size: 14px;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+.center_varios {
+        display: flex; justify-content: center; 
+    }
+    
+
+    .btn-group button {
+        background-color: blue; 
+        border: 1px solid lightskyblue; 
+        color: white;
+        padding: 4px 8px; /* Some padding */
+        cursor: pointer; /* Pointer/hand icon */
+        float: left; /* Float the buttons side by side */
+      }
+      
+      .btn-group button:not(:last-child) {
+        border-right: none; /* Prevent double borders */
+      }
+      
+      /* Clear floats (clearfix hack) */
+      .btn-group:after {
+        content: "";
+        clear: both;
+        display: table;
+      }
+      
+      /* Add a background color on hover */
+      .btn-group button:hover {
+        background-color: darkblue;
+      }
