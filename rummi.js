@@ -710,6 +710,7 @@ function buscarEscaleras(jugador) {
         // si que esta, vamos a ver si esta en un lugar aprovechable
         for (let f = 0; f < gruposMesa.length; f++) {
           var fichasMesa = [...gruposMesa[f].cells];
+          if (fichasMesa[f] > 3) {
           if (fichasMesa[0].id.substr(1) == fichaIzda) {
             fichaAMover = fichasMesa[0];
             porIzda = true;
@@ -748,6 +749,7 @@ function buscarEscaleras(jugador) {
             }
           }
         }
+      } 
       }
       } else  {ret = "-1";}
     }
@@ -793,7 +795,7 @@ function robarFicha(jugador) {
       filaMaquina.appendChild(ficha);
      }
     } else {alert ("El saco está vacío");}
-} else { //empieza unas nueva jugada 
+} else { //empieza una nueva jugada 
   fichaJugada = false;
   document.getElementById("Cambio").innerHTML="Robar ficha";
   document.getElementById("Cambio").classList.remove("btn-primarry");
@@ -801,14 +803,16 @@ function robarFicha(jugador) {
 }
 
 if (jugador) {
+  if (traza) console.log("***************************** Turno COMPUTADOR *******************************2");
   jugadaComp();
   document.getElementById("Jugada").style.visibility="hidden"; 
   robarFicha(false);
-  setTimeout(aviso, 2000);
+  setTimeout(aviso, 1000);
   function aviso() {
     alert("TURNO COMPUTADOR: jugada concluída: Cambio a TURNO JUGADOR");
   }
 } else {
+  if (traza) console.log("***************************** Turno JUGADOR *******************************");
   textoJ.innerHTML = "TURNO JUGADOR: arrastre fichas de la mano del jugador o pida sugerencia de juego";
   document.getElementById("Jugada").style.visibility="visible"; 
 }
@@ -817,8 +821,8 @@ if (jugador) {
 /******************************************************************************/
 
 function ampliarSerie(jugador){
-  var fichasJugador = [...filaJugador.cells];
-  var fichasMaquina = [...filaMaquina.cells];
+  var fichasJugador = filaJugador.cells;
+  var fichasMaquina = filaMaquina.cells;
   limpiaFila(fichasJugador);
   limpiaFila(fichasMaquina);
   var fichas;
@@ -839,7 +843,7 @@ function ampliarSerie(jugador){
           // la ficha que amplía una S3 que ya está en la mesa se almacena en un array 
           // de codigos por color pq así lo exige "marcarFicha"
           arrCodigos[0] = fichas[j].id.substr(1);
-          var codigoGrupoMesa = "S-3-" + valores[i]+ "-" + colores[i]
+          var codigoGrupoMesa = "S-3-" + valores[i] + "-" + colores[i]
           marcarFichas("A", arrCodigos, jugador, codigoGrupoMesa);
           hayAmpliacion = true;
           break;
@@ -856,8 +860,8 @@ function ampliarSerie(jugador){
 /************************************************************************************ */
 function ampliarEscalera(jugador){
   if (traza) console.log(num_traza++ + " Busco AmE");
-  var fichasJugador = [...filaJugador.cells];
-  var fichasMaquina = [...filaMaquina.cells];
+  var fichasJugador = filaJugador.cells;
+  var fichasMaquina = filaMaquina.cells;
   limpiaFila(fichasJugador);
   limpiaFila(fichasMaquina);
   if (jugador) fichas = fichasJugador; else fichas = fichasMaquina;
@@ -888,7 +892,6 @@ function ampliarEscalera(jugador){
     }
   }
   if (hayAmpliacionEsc && jugador) {
-    // var textoJ = document.getElementById("textoJugador");
     textoJ.innerHTML = "TURNO JUGADOR: Amplia la escalera de la mesa haciendo doble click sobre la ficha en tu mano"
   }
   return hayAmpliacionEsc;
@@ -962,8 +965,6 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado, fichaDeL
 /*********   El computador calcula su jugada *************************************** */
 /*********************************************************************************** */
 function jugadaComp() {
-  var stop;
-  var directo = true;// hay que robar
 
   for (let stop = 8; stop; stop--) { // 8 es una salvaguarda para que no se hagan inf iteraciones
     var bs = buscarSeries(false);
@@ -984,11 +985,10 @@ function jugadaComp() {
           if (!buscarCortes(false)) {
             console.log("no Cortes");
             textoJ.innerHTML = "TURNO COMPUTADOR: pulse en CAMBIO para pasar el turno al jugador";
-            // if (directo) {robarFicha();}
            return;
-          } else textoJ.innerHTML = "TURNO COMPUTADOR: amplío serie";
-        } else textoJ.innerHTML = "TURNO COMPUTADOR: amplío escalera<<";
-      } else textoJ.innerHTML = "TURNO COMPUTADOR: corte";
+          } else textoJ.innerHTML = "TURNO COMPUTADOR: corte";
+        } else textoJ.innerHTML = "TURNO COMPUTADOR: amplío serie";
+      } else textoJ.innerHTML = "TURNO COMPUTADOR: amplío serie";
     }
     directo = false;
     //alert("jugada encontrada");
@@ -1147,7 +1147,7 @@ function seleccionarCorte() {
     document.getElementById("Cambio").style.display = "none";
     document.getElementById("Jugada").style.display = "none";
   }
-
+  seleccion = [];
   seleccion.push(this); 
   this.classList.add("marcasuave");
   
@@ -1327,6 +1327,10 @@ function limpiaFila(fichas) {
       fichas[i].removeAttribute("numGrupo");
       fichas[i].draggable = "true";
       fichas[i].setAttribute("ondragstart", "dragStart(event)");
+      fichas[i].removeEventListener("dblclick", seleccionarCorte);
+      fichas[i].removeEventListener("click", moverCorte);
+      fichas[i].addEventListener("dblclick", seleccionarGrupo);
+
       hazNoDropable(fichas[i]);
   } 
 }   
@@ -1421,7 +1425,7 @@ function copiarTabla() {
  
     filaJ = document.createElement("tr");
     document.getElementById("tablaJugador").appendChild(filaJ);
-    filaJ.style.display = "inline";
+    filaJ.style.display = "none";
     filaJ.id = "filaJugadorBis";
     for (let j = 0; j < filaJugador.cells.length; j++ ) {
         var cell = filaJ.insertCell(-1);
@@ -1450,7 +1454,8 @@ function reponerTabla() {
   }
   for (let i = 0; i < numrowsDest; i++) {
     var row = tablaMesa.insertRow(-1);
-    row.id = tablaDest.rows[i].id;
+    if (i == 0) row.id = "rummy"; 
+    else row.id = tablaDest.rows[i].id;
     if (i==0) row.style.display = 'none'
     for (let j = 0; j < tablaDest.rows[i].cells.length; j++) {
       var cell = tablaMesa.rows[i].insertCell(-1);
@@ -1459,7 +1464,7 @@ function reponerTabla() {
     cell.style.color = tablaDest.rows[i].cells[j].style.color;
     cell.className = "figuraFicha";
     }
-    marcarFilaMesa(row);
+    if (i!= 0) marcarFilaMesa(row);
   }
 
   var filaJugador = document.getElementById('filaJugador');
