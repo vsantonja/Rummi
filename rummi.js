@@ -5,8 +5,9 @@ var fm;
 var traza = true;
 var num_traza = 0;
 var textoJ;
-// var cancelable = false;
 var fichaJugada = false;
+var numFichasJ0;
+var modoCancelable = false;
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -22,9 +23,18 @@ var fichaJugada = false;
 //   ev.preventDefault();
 //   ev.target.classList.add('permiso');
 // }
-
 function dragStart(ev) { 
   ev.dataTransfer.setData("text", ev.target.id);
+  if (!modoCancelable) {
+    modoCancelable = true;
+  //  numFichasJ0 = document.getElementById("filaJugador").cells.length;
+    numFichasJ0 = filaJugador.cells.length;
+    copiarTabla();
+    document.getElementById("aceptarJugada").style.display = "inline";
+    document.getElementById("cancelarJugada").style.display = "inline";
+    document.getElementById("Cambio").style.display = "none";
+    document.getElementById("Sugerir").style.display = "none";
+  }
   fm=ev.target.id; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer-getData() solo se puede conocer en el "drop"
 }
 
@@ -41,6 +51,7 @@ function allowDrop(ev) {
   if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
     arr = filaFichasAArrayCodigos(ev.target.parentElement);
     arr = arr.concat(document.getElementById(fm).id.substr(1)); 
+   //arr = arr.concat(fm.id.substr(1)); 
   }
   if (validaSim(arr) != -1) {
     ev.preventDefault();
@@ -51,12 +62,17 @@ function allowDrop(ev) {
 }
 
   
-/////////////////////////////////////////////////////////////////////
-
+//*****************************************************************************
 function dragDrop(ev) { 
+ 
+  ev.preventDefault(); 
   var data = ev.dataTransfer.getData("text");
   var fichaMovil = document.getElementById(data);
-  ev.preventDefault(); 
+  var fichasOrig = fichaMovil.parentElement;
+  var fromMesa = false; 
+  if (fichaMovil.id.startsWith('M')) {
+    fromMesa = true; 
+  }
   fichaMovil.id = "M" + data.substr(1);
   if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
     //Si solo había una ficha en la fila las pongo ordenadas
@@ -76,19 +92,21 @@ function dragDrop(ev) {
     ev.target.classList.remove('error', 'marcada', 'permiso', 'marcasuave');
     hazNoDropable(ev.target);
     removeStyle(ev);
-  } // no suelta en una filas ecxistente
+  } // no suelta en una filas existente
   // if (previousRowId = fichaMovil.getAttribute("previousRow")) {
   //   marcarFilaMesa(document.getElementById(previousRowId));
   // }
-  marcarFilaMesa(filaMesa);
-  removeDragParams(ev, fichaMovil);
+  if (fromMesa) marcarFilaMesa(fichasOrig, false);
+  marcarFilaMesa(filaMesa, false);
+  //removeDragParams(ev, fichaMovil);
 }
 
 function hazDropable(ficha) {
   ficha.setAttribute("ondrop","dragDrop(event)");
   ficha.setAttribute("ondragover","allowDrop(event)");
   ficha.setAttribute("ondragleave","removeStyle(event)");
-  //ficha.setAttribute("ondragenter","allowDrop(event)");
+  ficha.draggable = true;
+  ficha.setAttribute("ondragstart", "dragStart(event)");
   return ficha;
 }
 
@@ -96,61 +114,63 @@ function hazNoDropable(ficha) {
   ficha.removeAttribute("ondrop");
   ficha.removeAttribute("ondragover");
   ficha.removeAttribute("ondragleave");
+  ficha.draggable = false;
+  ficha.removeAttribute("ondragstart");
   return ficha;
+  ;
 }
 
-function validaGrupo(filaMesa) {
-  var arr = [];
-  if (filaMesa.cells.length < 3) {
-    textoJ.innerHTML = "Siga arrastrando fichas para componer un grupo";
-    return 0;
-  } else {
-    arr =filaFichasAArrayCodigos(filaMesa);
-    if (esSerie(arr)){ 
-      filaMesa.id=obtenerCodigo(arr);
-      textoJ.innerHTML = "SERIE VÁLIDA";
-      ordenarFila(arr,filaMesa);
-      return 1;
-    }  
-    else if (esEscalera(arr)) { 
-      filaMesa.id = obtenerCodigo(arr);
-      textoJ.innerHTML = "ESCALERA VÁLIDA";
-      ordenarFila(arr,filaMesa);
-      return 2;
-    }
-    else {
-      textoJ.innerHTML = "GRUPO NO VÁLIDO (doble-click para devolver la ficha)";
-      beep2();  beep2();  beep2();  beep2();
-      return -1;
-    }
-  }  
-} 
+// function validaGrupo(filaMesa) {
+//   var arr = [];
+//   if (filaMesa.cells.length < 3) {
+//     textoJ.innerHTML = "Siga arrastrando fichas para componer un grupo";
+//     return 0;
+//   } else {
+//     arr =filaFichasAArrayCodigos(filaMesa);
+//     if (esSerie(arr)){ 
+//       filaMesa.id=obtenerCodigo(arr);
+//       textoJ.innerHTML = "SERIE VÁLIDA";
+//       ordenarFila(arr,filaMesa);
+//       return 1;
+//     }  
+//     else if (esEscalera(arr)) { 
+//       filaMesa.id = obtenerCodigo(arr);
+//       textoJ.innerHTML = "ESCALERA VÁLIDA";
+//       ordenarFila(arr,filaMesa);
+//       return 2;
+//     }
+//     else {
+//       textoJ.innerHTML = "GRUPO NO VÁLIDO (doble-click para devolver la ficha)";
+//       return -1;
+//     }
+//   }  
+// } 
 
 
-function validaGrupo2(filaMesa) {
-  var arr = [];
-  var divMesa = document.getElementById("zonaMesa");
-  if (filaMesa.cells.length < 3) {
-    divMesa.innerHTML = "Siga arrastrando fichas para componer un grupo";
-  } else {
-    arr =filaFichasAArrayCodigos(filaMesa);
-    if (esSerie(arr)){ 
-      filaMesa.id=obtenerCodigo(arr);
-      divMesa.innerHTML = "GRUPO VÁLIDO. Siga arrastrando fichas para componer otrp grupo";
-      ordenarFila(arr,filaMesa);
-    }  
-    else if (esEscalera(arr)) { 
-      filaMesa.id = obtenerCodigo(arr);
-      divMesa.innerHTML = "GRUPO VÁLIDO.Siga arrastrando fichas para componer otr0 grupo";
-      ordenarFila(arr,filaMesa);
-    }
-    else {
-      divMesa.innerHTML = "GRUPO NO VÁLIDO (doble-clcik para devolver la ficha)";
-      beep2();  beep2();  beep2();  beep2();
-      return -1;
-    }
-  }  
-} 
+// function validaGrupo2(filaMesa) {
+//   var arr = [];
+//   var divMesa = document.getElementById("zonaMesa");
+//   if (filaMesa.cells.length < 3) {
+//     divMesa.innerHTML = "Siga arrastrando fichas para componer un grupo";
+//   } else {
+//     arr =filaFichasAArrayCodigos(filaMesa);
+//     if (esSerie(arr)){ 
+//       filaMesa.id=obtenerCodigo(arr);
+//       divMesa.innerHTML = "GRUPO VÁLIDO. Siga arrastrando fichas para componer otrp grupo";
+//       ordenarFila(arr,filaMesa);
+//     }  
+//     else if (esEscalera(arr)) { 
+//       filaMesa.id = obtenerCodigo(arr);
+//       divMesa.innerHTML = "GRUPO VÁLIDO.Siga arrastrando fichas para componer otr0 grupo";
+//       ordenarFila(arr,filaMesa);
+//     }
+//     else {
+//       divMesa.innerHTML = "GRUPO NO VÁLIDO (doble-clcik para devolver la ficha)";
+//       beep2();  beep2();  beep2();  beep2();
+//       return -1;
+//     }
+//   }  
+// } 
 
 ////////////////////////////////////////////////////////////////
 
@@ -177,17 +197,21 @@ function dragDropFin(ev) {
     ev.preventDefault(); 
     var data = ev.dataTransfer.getData("text");
     var fichaMovil = document.getElementById(data);
+    var fichasOrig =fichaMovil.parentElement;
+    var fromMesa = false; 
+    if (fichaMovil.id.startsWith('M')) {
+     fromMesa = true; 
+    }
     var ultimaFila = document.createElement("tr");
     var tablaMesa = document.getElementById("tablaMesa");
     tablaMesa.appendChild(ultimaFila);
-    ultimaFila.appendChild(hazDropable(document.getElementById(data)));
+    ultimaFila.appendChild(hazDropable(fichaMovil));
     ev.target.removeAttribute("style");
-    removeDragParams(ev, fichaMovil);
+   // removeDragParams(ev, fichaMovil);
     filaMesa = ultimaFila;
     filaMesa.id = "X-filaMesa";
-    fichaMovil.id = "M" + data.substr(1);
-    fichaJugada =true;
-    document.getElementById("Cambio").innerHTML="Cambio turno";
+    fichaMovil.id = "M" + data.substr(1);   // document.getElementById("Cambio").innerHTML="Cambio turno";
+  if (fromMesa) marcarFilaMesa(fichasOrig, false);
 }
 
 
@@ -199,23 +223,16 @@ function removeStyle(ev) {
 }
 
 
-function removeDragParams(ev,ficha) {  
-    if (ev.dataTransfer.items) {
-      // Use DataTransferItemList interface to remove the drag data
-      ev.dataTransfer.items.clear();
-    } else {
-      // Use DataTransfer interface to remove the drag data
-      ev.dataTransfer.clearData();
-    }
-    ficha.draggable = false;
-}
-
-function beep2()
-{ var snd = new Audio("data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=");  
-  snd.play();
-}
-
-
+// function removeDragParams(ev,ficha) {  
+//     if (ev.dataTransfer.items) {
+//       // Use DataTransferItemList interface to remove the drag data
+//       ev.dataTransfer.items.clear();
+//     } else {
+//       // Use DataTransfer interface to remove the drag data
+//       ev.dataTransfer.clearData();
+//     }
+//     ficha.draggable = false;
+// }
 
 /*****************************************************************************/
 /*****************************************************************************/
@@ -335,13 +352,14 @@ function iniciar(prueba) {
         //ficha.draggable = "true";
         filaMesa.appendChild(ficha);
       }
-      marcarFilaMesa(filaMesa,'I');
+      marcarFilaMesa(filaMesa, false);
     }
   }
  // solo se reparte una vez. Así que escondo los botones de reparto
   document.getElementById("botonRepartir" ).style.display = "none";  
   document.getElementById("botonRepartir1").style.display = "none"; 
-  textoJ.innerHTML = "TURNO JUGADOR: Arrastra fichas de la mano del jugador a la mesa o pide una sugererencia de juego";
+  document.getElementById("numeroFichas").innerHTML ="14 fichas";
+  textoJ.innerHTML = "TURNO JUGADOR: Arrastra fichas del jugador a la mesa o pide una sugererencia";
  
 }
 
@@ -404,7 +422,7 @@ function seleccionarGrupo() {
       filaMesa.appendChild(this);
     }
     this.id = 'M' + this.id.substr(1);
-    marcarFilaMesa(filaMesa);
+    marcarFilaMesa(filaMesa, true);
     this.removeAttribute("lado");
     this.removeAttribute("gType");
     this.removeAttribute("numGrupo");
@@ -434,7 +452,7 @@ function seleccionarGrupo() {
     } else {
       filaMesaDest.appendChild(fichaMesa[0]);
     }
-    marcarFilaMesa(filaVella);
+    marcarFilaMesa(filaVella, true);
     // fichaMesa[0].grup = "S";
   }
   if (groupType == 'C')  {
@@ -449,13 +467,10 @@ function seleccionarGrupo() {
         filaMesaDest.appendChild(fichasMesa2[i]);
       }
     }
-    // marcarFilaMesa(filaMesaDest);
-    // marcarFilaMesa(filaMesa);
   }
-//   document.getElementById("robarFicha").innerHTML = "Cambio";
 }
-if (filaMesaDest) marcarFilaMesa(filaMesaDest);
-if (filaMesa) marcarFilaMesa(filaMesa);
+if (filaMesaDest) marcarFilaMesa(filaMesaDest,true);
+if (filaMesa) marcarFilaMesa(filaMesa, true);
   if (traza) trazaMesa();
 }
 
@@ -479,8 +494,9 @@ function buscarSeries(jugador) {
   var fichasJugador = [...filaJugador.cells];
   var fichasMaquina = [...filaMaquina.cells];
   // primero, hacemos limpieza
-  limpiaFila(fichasJugador);
-  limpiaFila(fichasMaquina);
+  limpiaFila(filaJugador);
+  hazDraggable(filaJugador);
+  limpiaFila(filaMaquina);
   misFichas = fichasJugador.map(el => el.id.substr(1));
   maqFichas = fichasMaquina.map(el => el.id.substr(1));
   // cambio la codif. dandole prioridad al valor
@@ -609,10 +625,9 @@ function buscarEscaleras(jugador) {
   var ret = "0";
 
   // Limpieza: desmarca, borra el tipo de grupo y el numero de grupo
-  var fichasJugador = [...filaJugador.cells];
-  var fichasMaquina = [...filaMaquina.cells];
-  limpiaFila(fichasJugador);
-  limpiaFila(fichasMaquina);
+  limpiaFila(filaJugador);
+  hazDraggable(filaJugador);
+  limpiaFila(filaMaquina);
   misFichas = [...filaJugador.cells].map(el => parseInt(el.id.substr(1)));
   maqFichas = [...filaMaquina.cells].map(el => parseInt(el.id.substr(1)));
   if (jugador) fichas = misFichas; else fichas = maqFichas;
@@ -762,37 +777,37 @@ function buscarEscaleras(jugador) {
 /* ****************************************************************************** */
 function robarFicha(jugador) {
 
-    var gruposMesa = [...document.getElementById("tablaMesa").rows];
-   var grupo =[];
-    if (jugador) {
-      var longRows = gruposMesa.length;
-      for (let i = longRows - 1; i > 0 ; i--) {
-        if (gruposMesa[i].cells.length < 3) {
-         grupo[i] = gruposMesa[i].cells;
-         var longCells =  grupo[i].length;
-          for (let j=0; j < longCells; j++) {
-            grupo[i][0].id = 'F' + grupo[i][0].id.substr(1); 
-           filaJugador.appendChild(grupo[i][0]); 
-          }
-          document.getElementById("tablaMesa").deleteRow(-1);
-        }
-      }
-      limpiaFila(filaJugador);
+  //  var gruposMesa = [...document.getElementById("tablaMesa").rows];
+  //  var grupo =[];
+  //   if (jugador) {
+  //     // si hay grupos de 1 o de 2 los elimina y devuelve la fichas a la mano del jugador
+  //     const longRows = gruposMesa.length;
+  //     for (let i = longRows - 1; i > 0 ; i--) { //recuerda que i=0 es rummy
+  //       if (gruposMesa[i].cells.length < 3) {
+  //        grupo[i] = gruposMesa[i].cells;
+  //        const longCells =  grupo[i].length;
+  //         for (let j=0; j < longCells; j++) {
+  //           grupo[i][0].id = 'F' + grupo[i][0].id.substr(1); 
+  //          filaJugador.appendChild(grupo[i][0]); 
+  //         }
+  //         document.getElementById("tablaMesa").deleteRow(-1);
+  //       }
+  //     }
+  //     limpiaFila(filaJugador);
    // ************************* si no ha jugado ficha ===>   fichaJugada = false
-    }
+   // }
 
   if (!fichaJugada) { // no se jugado ninguna ficha de la mano. Por tanto ates de cambiar de turno hay que robar 
     if (fichasSaco.length > 0) {
      var ficha = fichasSaco.pop();
-     if (jugador) ficha.id = 'F' + ficha.id.substr(1); 
-     else ficha.id = 'C' + ficha.id.substr(1);
-      if (traza) console.log("robo ficha" + ficha.id);
-      ficha.draggable = "true";
-      ficha.setAttribute("ondragstart", "dragStart(event)");
+     if (jugador) ficha.id = 'F' + ficha.id.substr(1);  else ficha.id = 'C' + ficha.id.substr(1);
+      if (traza) console.log("robo ficha " + ficha.id);
       if (jugador) {
-      filaJugador.appendChild(ficha);
+        ficha.draggable = "true";
+        ficha.setAttribute("ondragstart", "dragStart(event)");
+        filaJugador.appendChild(ficha);
       } else {
-      filaMaquina.appendChild(ficha);
+        filaMaquina.appendChild(ficha);
      }
     } else {alert ("El saco está vacío");}
 } else { //empieza una nueva jugada 
@@ -803,17 +818,18 @@ function robarFicha(jugador) {
 }
 
 if (jugador) {
-  if (traza) console.log("***************************** Turno COMPUTADOR *******************************2");
+  if (traza) console.log("***************************** Turno COMPUTADOR *******************************");
   jugadaComp();
-  document.getElementById("Jugada").style.visibility="hidden"; 
+  document.getElementById("Sugerir").style.visibility="hidden"; 
   robarFicha(false);
+  document.getElementById("numeroFichas").innerHTML = (document.getElementById("filaMaquina").cells.length) + " fichas";
   setTimeout(aviso, 1000);
   function aviso() {
     alert("TURNO COMPUTADOR: jugada concluída: Cambio a TURNO JUGADOR");
   }
 } else {
   if (traza) console.log("***************************** Turno JUGADOR *******************************");
-  textoJ.innerHTML = "TURNO JUGADOR: arrastre fichas de la mano del jugador o pida sugerencia de juego";
+  textoJ.innerHTML = "TURNO JUGADOR: arrastre fichas del jugador o pida sugerencia";
   document.getElementById("Jugada").style.visibility="visible"; 
 }
 }
@@ -823,8 +839,9 @@ if (jugador) {
 function ampliarSerie(jugador){
   var fichasJugador = filaJugador.cells;
   var fichasMaquina = filaMaquina.cells;
-  limpiaFila(fichasJugador);
-  limpiaFila(fichasMaquina);
+  limpiaFila(filaJugador);
+  hazDraggable(filaJugador);
+  limpiaFila(filaMaquina);
   var fichas;
   if (jugador) fichas = fichasJugador; else fichas = fichasMaquina;
   if (traza) console.log(num_traza++ + " Busco AmS");
@@ -862,8 +879,9 @@ function ampliarEscalera(jugador){
   if (traza) console.log(num_traza++ + " Busco AmE");
   var fichasJugador = filaJugador.cells;
   var fichasMaquina = filaMaquina.cells;
-  limpiaFila(fichasJugador);
-  limpiaFila(fichasMaquina);
+  limpiaFila(filaJugador);
+  hazDraggable(filaJugador);
+  limpiaFila(filaMaquina);
   if (jugador) fichas = fichasJugador; else fichas = fichasMaquina;
   var hayAmpliacionEsc = false;
   var tablaMesa = document.getElementById("tablaMesa");
@@ -997,6 +1015,7 @@ function jugadaComp() {
     // function retrasaSeleccion() {setTimeout(hazClick,1000);}
     // function hazClick(){seleccionarGrupo.call(buscaMarca())}
   } // for
+
 }
 
 
@@ -1021,7 +1040,7 @@ function buscarCortes(jugador) {
   var codJ;
   if (traza) console.log(num_traza++ + " Busco Cortes");
 
-  filaJugador = document.getElementById("filaJugador");
+ // filaJugador = document.getElementById("filaJugador");
   filaMaquina = document.getElementById("filaMaquina");
 
   EMesa = EMesa.filter(el => !el.id.startsWith("E-3"));
@@ -1136,68 +1155,117 @@ function buscarCortes(jugador) {
 }
    
 //*****************************************************************************
-var modoCorte = false;
-function seleccionarCorte() {
-  textoJ.innerHTML = "TURNO JUGADOR: modo MESA salga de este modo con ACEPTAR o CANCELAR";
-  if (!modoCorte) {
-    modoCorte = true;
-    copiarTabla();
-    document.getElementById("aceptarCorte").style.display = "inline";
-    document.getElementById("cancelarCorte").style.display = "inline";
-    document.getElementById("Cambio").style.display = "none";
-    document.getElementById("Jugada").style.display = "none";
-  }
-  seleccion = [];
-  seleccion.push(this); 
-  this.classList.add("marcasuave");
+
+// function seleccionarCorte() {
+//   textoJ.innerHTML = "TURNO JUGADOR: modo MESA salga de este modo con ACEPTAR o CANCELAR";
+//   if (!modoCancelable) {
+//     modoCancelable = true;
+//     copiarTabla();
+//     document.getElementById("aceptarJugada").style.display = "inline";
+//     document.getElementById("cancelarJugada").style.display = "inline";
+//     document.getElementById("Cambio").style.display = "none";
+//     document.getElementById("Jugada").style.display = "none";
+//   }
+//   seleccion = [];
+//   seleccion.push(this); 
+//   this.classList.add("marcasuave");
   
-  this.addEventListener("dblclick",  moverCorte);
-  hermano =  this.nextElementSibling;
-  while (hermano) {
-    hermano.classList.add("marcasuave");
-    seleccion.push(hermano);
-    hermano.addEventListener("dblclick",  moverCorte);
-    hermano =  hermano.nextElementSibling;
-  }
-}
+//   // this.addEventListener("dblclick",  moverCorte);
+//   hermano =  this.nextElementSibling;
+//   while (hermano) {
+//     hermano.classList.add("marcasuave");
+//     seleccion.push(hermano);
+// //    hermano.addEventListener("dblclick",  moverCorte);
+//     hermano =  hermano.nextElementSibling;
+//   }
+// }
 
 
 //*****************************************************************************
-function moverCorte(){
-  var filaMesaOrig = this.parentElement; 
-  var tablaMesa = document.getElementById("tablaMesa");
-  var filaMesaDest = tablaMesa.insertRow(tablaMesa.length);
-  var filaMesaDest = document.createElement("tr");
-  tablaMesa.appendChild(filaMesaDest);
+// function moverCorte(){
+//   var filaMesaOrig = this.parentElement; 
+//   var tablaMesa = document.getElementById("tablaMesa");
+//   var filaMesaDest = tablaMesa.insertRow(tablaMesa.length);
+//   var filaMesaDest = document.createElement("tr");
+//   tablaMesa.appendChild(filaMesaDest);
   
-  f = seleccion.shift();
-  while(f) {
-    filaMesaDest.appendChild(f);
-    f = seleccion.shift();
-  }
-  marcarFilaMesa(filaMesaOrig, 'X');
-  marcarFilaMesa(filaMesaDest, 'X');
-}
+//   f = seleccion.shift();
+//   while(f) {
+//     filaMesaDest.appendChild(f);
+//     f = seleccion.shift();
+//   }
+//   var arrO = filaFichasAArrayCodigos(filaMesaOrig);
+//   var arrD = filaFichasAArrayCodigos(filaMesaDest);
+//   if (esSerie(arrO) || esEscalera(arrO)) {
+//     filaMesaOrig.id = obtenerCodigo(arrO);
+//   } else {
+//     filaMesaOrig.id = "X-filaCorte";
+//   }
+  
+//   if (esSerie(arrD) || esEscalera(arrD)) {
+//     filaMesaDest.id = obtenerCodigo(arrD)
+//   } else {
+//     filaMesaOrig.id = "X-filaCorte";
+//   }
+  
+//   marcarFilaMesa(filaMesaDest);
+//   marcarFilaMesa(filaMesaOrig); 
+// }
 
 
 //*****************************************************************************
-function aceptarCorte() {
-  modoCorte = false;
-  document.getElementById("aceptarCorte").style.display = "none";
-  document.getElementById("cancelarCorte").style.display = "none";
+function aceptarJugada() {
+  modoCancelable = false;
+  var gruposMesa = [...document.getElementById("tablaMesa").rows];
+  var grupo =[];
+   
+  // si hay grupos de 1 o de 2 los elimina y devuelve la fichas a la mano del jugador
+  const longRows = gruposMesa.length;
+  for (let i = longRows - 1; i > 0 ; i--) { //recuerda que i=0 es rummy
+    if (gruposMesa[i].cells.length < 3) {
+    grupo[i] = gruposMesa[i].cells;
+    const longCells =  grupo[i].length;
+      for (let j=0; j < longCells; j++) {
+        grupo[i][0].id = 'F' + grupo[i][0].id.substr(1); 
+      filaJugador.appendChild(grupo[i][0]); 
+      }
+      document.getElementById("tablaMesa").deleteRow(-1);
+    }
+  }
+  limpiaFila(filaJugador);
+  hazDraggable(filaJugador);
+  document.getElementById("tablaJugador").deleteRow(1);
+  document.getElementById("aceptarJugada").style.display = "none";
+  document.getElementById("cancelarJugada").style.display = "none";
   document.getElementById("Cambio").style.display = "inline";
   document.getElementById("Jugada").style.display = "inline";
-
+  nfj = numFichasJ0 - filaJugador.cells.length; 
+  if (nfj > 0) {
+    fichaJugada = true
+    document.getElementById("Cambio").innerHTML="Cambio turno";
+    document.getElementById("Cambio").classList.remove("btn-danger");
+    document.getElementById("Cambio").classList.add("btn-primary");
+  }
 }
 
-
-function cancelarCorte() {
-  modoCorte = false;
-  document.getElementById("aceptarCorte").style.display = "none";
-  document.getElementById("cancelarCorte").style.display = "none";
+function cancelarJugada() {
+  modoCancelable = false;
+  document.getElementById("aceptarJugada").style.display = "none";
+  document.getElementById("cancelarJugada").style.display = "none";
   document.getElementById("Cambio").style.display = "inline";
   document.getElementById("Jugada").style.display = "inline";
+
   reponerTabla();
+  document.getElementById("tablaJugador").deleteRow(1);
+
+  //nfj = numFichasJ0 - document.getElementById("filaJugador").cells.length;
+  nfj = numFichasJ0 - filaJugador.cells.length;
+  if (nfj > 0) {
+    fichaJugada = true;
+    document.getElementById("Cambio").innerHTML="Cambio turno";
+    document.getElementById("Cambio").classList.remove("btn-danger");
+    document.getElementById("Cambio").classList.add("btn-primary");
+  } 
 }
 
 //************************************************************************** */
@@ -1213,7 +1281,7 @@ function cancelarCorte() {
 // los duplicados se codifican de forma especial
 function codifValor(arrCo) {
   let val;
-  let col;
+  let col;7
   let arrVa = arrCo.slice();
   for (let i = 0; i < arrVa.length; i++) {
  
@@ -1296,22 +1364,19 @@ function trazaMesa() {
 //******************************************************************************/
  // reinicializa el formato de una fila de la MESA 
  // y le añade su id correcto
- function marcarFilaMesa(fila, tipo) {
+ function marcarFilaMesa(fila, consume) {
   var fichas = fila.cells;
-  if (fichas.length < 3 ) textoJ.innerHTML = "complete el grupo " + fichas;
   for (let i=0; i < fichas.length; i++) {
     fichas[i].classList.remove('error', 'marcada', 'permiso', 'marcasuave');
     hazNoDropable(fichas[i]);
-    //fichas[i].draggable = "true";
-    fichas[i].setAttribute("ondragstart", "dragStartMesa(event)");
-    fichas[i].addEventListener("click",  seleccionarCorte);
+  // //  fichas[i].addEventListener("dblclick",  seleccionarCorte);
+  //   fichas[i].draggable = "true";
+  //   fichas[i].setAttribute("ondragstart", "dragStart(event)");
   }
   hazDropable(fichas[0]);
   hazDropable(fichas[fichas.length-1]);
   fila.id = obtenerCodigo(filaFichasAArrayCodigos(fila));
-  if (tipo == 'X') {
-    fila.id = 'X' + fila.id;
-  } else if (tipo != 'I') {
+  if (consume) {
     fichaJugada = true;
     document.getElementById("Cambio").innerHTML="Cambio turno";
     document.getElementById("Cambio").classList.remove("btn-danger");
@@ -1321,17 +1386,24 @@ function trazaMesa() {
  }
  /* ****************************************************************************** */
 function limpiaFila(fichas) {
-  for (let i = 0; i < fichas.length; i++ ) {
-      fichas[i].classList.remove('error', 'marcada', 'permiso', 'marcasuave');
-      fichas[i].removeAttribute("gType");
-      fichas[i].removeAttribute("numGrupo");
-      fichas[i].draggable = "true";
-      fichas[i].setAttribute("ondragstart", "dragStart(event)");
-      fichas[i].removeEventListener("dblclick", seleccionarCorte);
-      fichas[i].removeEventListener("click", moverCorte);
-      fichas[i].addEventListener("dblclick", seleccionarGrupo);
+  for (let i = 0; i < fichas.cells.length; i++ ) {
+      fichas.cells[i].classList.remove('error', 'marcada', 'permiso', 'marcasuave');
+      fichas.cells[i].removeAttribute("gType");
+      fichas.cells[i].removeAttribute("numGrupo");
+   // fichas[i].removeEventListener("dblclick", seleccionarCorte);
+   // fichas[i].removeEventListener("click", moverCorte);
+      fichas.cells[i].addEventListener("dblclick", seleccionarGrupo);
+      fichas.cells[i].removeAttribute("ondrop");
+      fichas.cells[i].removeAttribute("ondragover");
+      fichas.cells[i].removeAttribute("ondragleave");
+  } 
+}   
 
-      hazNoDropable(fichas[i]);
+
+function hazDraggable(fichas) {
+  for (let i = 0; i < fichas.cells.length; i++ ) {
+      fichas.cells[i].draggable = "true";
+      fichas.cells[i].setAttribute("ondragstart", "dragStart(event)");
   } 
 }   
 
@@ -1400,12 +1472,11 @@ function ordenarFila(arr, fila) {
 //*****************************************************************************
 function copiarTabla() {
  
-  // if (!modoCorte) {
+ 
     var tablaDest = document.getElementById('tablaDest');
     var tablaMesa = document.getElementById('tablaMesa');
-    var filaJugador = document.getElementById('filaJugador');
+    //var filaJugador = document.getElementById('filaJugador');
 
-   // cancelable = true;
     numrows = tablaDest.rows.length;
     for (let i = 0; i < numrows; i++) {
       tablaDest.deleteRow(0);
@@ -1425,7 +1496,7 @@ function copiarTabla() {
  
     filaJ = document.createElement("tr");
     document.getElementById("tablaJugador").appendChild(filaJ);
-    filaJ.style.display = "none";
+    filaJ.style.display = "inline";
     filaJ.id = "filaJugadorBis";
     for (let j = 0; j < filaJugador.cells.length; j++ ) {
         var cell = filaJ.insertCell(-1);
@@ -1439,11 +1510,6 @@ function copiarTabla() {
 
 function reponerTabla() {
 
-  // if (!cancelable) {
-  //   textoJ.innerHTML = "TURNO JUGADOR: operación no cancelable";
-  //   return;
-  // }
-  // cancelable = false;
   var tablaDest = document.getElementById('tablaDest');
   var tablaMesa = document.getElementById('tablaMesa');
   
@@ -1464,18 +1530,14 @@ function reponerTabla() {
     cell.style.color = tablaDest.rows[i].cells[j].style.color;
     cell.className = "figuraFicha";
     }
-    if (i!= 0) marcarFilaMesa(row);
+    if (i!= 0) marcarFilaMesa(row,true);
   }
 
-  var filaJugador = document.getElementById('filaJugador');
+  //var filaJugador = document.getElementById('filaJugador');
   var filaJugadorBis = document.getElementById('filaJugadorBis');
-  
-
   var long = filaJugador.cells.length;
   for (let i = 0; i < long; i++)
     filaJugador.deleteCell(0);
-
-
     for (let j = 0; j < filaJugadorBis.cells.length; j++) {
       var cell = filaJugador.insertCell(-1);
       cell.id = filaJugadorBis.cells[j].id;
@@ -1483,8 +1545,8 @@ function reponerTabla() {
     cell.style.color = filaJugadorBis.cells[j].style.color;
     cell.className = "figuraFicha";
     }
-
-    limpiaFila(filaJugador.cells);
+    limpiaFila(filaJugador);
+    hazDraggable(filaJugador);
     textoJ.innerHTML = "TURNO JUGADOR: operación cancelada";
   }
 
@@ -1495,12 +1557,13 @@ function reponerTabla() {
 var compVisible=false;
 function mostrarManoComutador() {
   if (compVisible) {
-    document.getElementById("tablaMaquina").style.display = "none";
-    document.getElementById("MMC").innerHTML = "Ver mano computador";
+   document.getElementById("tablaMaquina").style.display = "none";
+   document.getElementById("numeroFichas").innerHTML =(document.getElementById("filaMaquina").cells.length) + " fichas";
+   document.getElementById("MMC").innerHTML = "Ver";
   }
   else {
-    document.getElementById("tablaMaquina").style.display = "inline";
-    document.getElementById("MMC").innerHTML = "Ocultar";
+   document.getElementById("tablaMaquina").style.display = "inline";
+   document.getElementById("MMC").innerHTML = "Ocultar";
   }
   compVisible = !compVisible;
 }
@@ -1509,6 +1572,9 @@ function mostrarManoComutador() {
 var botonesJugadasVisibles = false;
 function verBotonesJugadas() {
   if (botonesJugadasVisibles) {
+
+    document.getElementById("Jugadas").innerHTML = "Jugadas >";
+    document.getElementById("Sugerir").style.display = "none";
     document.getElementById("botonSeries").style.display = "none";
     document.getElementById("botonEscaleras").style.display = "none";
     document.getElementById("botonAmpS").style.display = "none";
@@ -1516,6 +1582,8 @@ function verBotonesJugadas() {
     document.getElementById("buscarCortes").style.display = "none" ;  
   }
   else {
+    document.getElementById("Jugada").innerHTML = "Jugadas <";
+    document.getElementById("Sugerir").style.display = "inline";
     document.getElementById("botonSeries").style.display = "inline";
     document.getElementById("botonEscaleras").style.display = "inline";
     document.getElementById("botonAmpS").style.display = "inline";
@@ -1526,4 +1594,26 @@ function verBotonesJugadas() {
 }
 
 
+/******************************************************************************/
+function proclamarGanador(jugador) {
 
+  alert("El ganador es: el" + (jugador?" JUGADOR":" COMPUTADOR") + ". Terminó el juego");
+
+}
+
+function ordenarColor(){
+//var filaJugador = document.getElementById("filaJugador");
+var arr =filaFichasAArrayCodigos(filaJugador);
+ordenar(arr);
+ordenarFila(arr,filaJugador);  
+}
+
+
+function ordenarValor(){
+  //var filaJugador = document.getElementById("filaJugador");
+  var arr =filaFichasAArrayCodigos(filaJugador);
+  arr= codifValor(arr);
+  ordenar(arr);
+  arr= codifColor(arr);
+  ordenarFila(arr,filaJugador);  
+}

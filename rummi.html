@@ -9,27 +9,28 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="rummi.css">
   </head>
-  
+   
 <body>
     
-    <div class="center-varios">
+    <div class="center_varios">
         <button type="button" class="btn btn-primary center-varios" onclick="nuevoJuego()">Nueva partida</button>
-        <button type="button" class="btn btn-primary center-varios" onclick="sugerirJugada()"  id ="Jugada"> Sugerir jugada</button>
-        <button type="button" class="btn btn-danger center-varios" onclick="robarFicha(true)" id ="Cambio"> Robar ficha</button> 
+        <button type="button" class="btn btn-danger center-varios"  onclick="robarFicha(true)" id ="Cambio"> Robar ficha</button> 
         <button type="button" class="btn btn-primary center-varios" onclick="iniciar(0)"       id = "botonRepartir">Repartir</button>
-        <button type="button" class="btn btn-warning center-varios" onclick="iniciar(1)" id = "botonRepartir1">Reparto de prueba</button>
-        <button type="button" class="btn btn-warning center-varios" onclick="cancelarCorte()" id = "cancelarCorte" style="display: none">Cancelar</button>
-        <button type="button" class="btn btn-warning center-varios" onclick="aceptarCorte()" id = "aceptarCorte" style="display: none">Aceptar</button>
+        <button type="button" class="btn btn-warning center-varios" onclick="iniciar(1)"       id = "botonRepartir1">X</button>
+        <button type="button" class="btn btn-warning center-varios" onclick="cancelarJugada()" id = "cancelarJugada"  style="display: none">Cancelar</button>
+        <button type="button" class="btn btn-warning center-varios" onclick="aceptarJugada()"  id = "aceptarJugada"   style="display: none">Aceptar</button>
+        <button type="button" class="btn btn-primary center-varios" onclick="ordenarValor()"   id = "ordenarValor" style="margin-left: 20px">Ord.valor</button>
+        <button type="button" class="btn btn-primary center-varios" onclick="ordenarColor()"   id ="ordenarColor">Ord.color</button> 
     </div>
     
-     
-    <div class="center-varios"> 
-        <button class="btn btn-dark" onclick="verBotonesJugadas()"   id="botonJugadas">Jugadas > </button> 
-        <button class="btn btn-Dark" onclick="buscarSeries(true)"    id="botonSeries"    style="display: none" >   Series</button> 
+    <div class="center_varios"> 
+        <button class="btn btn-Dark" onclick="verBotonesJugadas()"   id="Jugada">Jugadas > </button> 
+        <button class="btn btn-Dark" onclick="sugerirJugada()"       id="Sugerir"  style="display: none" >Sugerir</button>
+        <button class="btn btn-Dark" onclick="buscarSeries(true)"    id="botonSeries"    style="display: none" >Series</button> 
         <button class="btn btn-Dark" onclick="buscarEscaleras(true)" id="botonEscaleras" style="display: none" >Escaleras</button> 
         <button class="btn btn-Dark" onclick="ampliarSerie(true)"    id="botonAmpS"      style="display: none" >AmpS</button>
         <button class="btn btn-Dark" onclick="ampliarEscalera(true)" id="botonAmpE"      style="display: none" >AmpE</button>            
-        <button class="btn btn-Dark" onclick="buscarCortes(true)"    id ="buscarCortes"  style="display: none" >Corte</button>
+        <button class="btn btn-Dark" onclick="buscarCortes(true)"    id="buscarCortes"  style="display: none" >Corte</button>
     </div>
 
        
@@ -38,14 +39,14 @@
         <table id="tablaSaco"></table>
     </div>
                 
-    <h3 style="text-align: center">  Jugador </h3>
+    <h4 style="text-align: center">  Jugador </h4>
     <div style="margin: 0px" id="zonaJugador" class="center_varios"> 
         <table id="tablaJugador">  
             <tr id="filaJugador"></tr>    
         </table>
     </div>
     <div style="text-align: center ; margin:0px;  color:Gray", id="textoJugador"> Propuesta de juego</div> 
-     <div style backgroundColor = "lightgreen">
+   
     <div style="margin: 0px" id="zonaMesaRummy" class="center_varios"> 
         <table id="tablaMesa"> 
             <tr style="display: none" id="rummy"> 
@@ -61,17 +62,19 @@
         </table>
     </div> 
 
-    <div class="zonaMesa"  id="zonaMesa" class="center_varios"  ondrop="dragDropFin(event)" ondragover="allowDrop(event)" ondragleave="removeStyle(event)">    
-        <br>Arrastre fichas aquí para crear un grupo nuevo.<br>
-    </div>
-</div>
-    <h3 style="text-align: center"> Computador </h3>
+    <div class="center-varios zonaMesa"  id="zonaMesa" ondrop="dragDropFin(event)" ondragover="allowDrop(event)" ondragleave="removeStyle(event)">    
+    Arrastre fichas aquí para crear un grupo nuevo</div>
+
+
+    <h4 style="text-align: center"> Computador </h4>
 
     <div style="margin: 0px" id="zonaComp" class="center_varios">   
            <table style="display: none" id="tablaMaquina">   
                <tr id="filaMaquina"></tr>       
            </table>
-           <button type="button" class="btn btn-primary" style="display: none"  onclick="mostrarManoComutador()"  id ="MMC"> Ver mano computador </button>
+           <div class = "numfichas" id="numeroFichas">0 fichas</div> 
+
+           <button type="button" class="btn btn-primary" style="display: none"  onclick="mostrarManoComutador()"  id ="MMC"> Ver</button>
     </div>
 
    <script src="rummi.js"></script>          
