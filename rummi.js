@@ -33,7 +33,13 @@ function dragStart(ev) {
     document.getElementById("aceptarJugada").style.display = "inline";
     document.getElementById("cancelarJugada").style.display = "inline";
     document.getElementById("Cambio").style.display = "none";
-    document.getElementById("Sugerir").style.display = "none";
+    document.getElementById("Jugada").style.visibility = "hidden";
+    document.getElementById("Sugerir").style.visibility = "hidden";
+    document.getElementById("botonSeries").style.visibility = "hidden";
+    document.getElementById("botonEscaleras").style.visibility = "hidden";
+    document.getElementById("botonAmpS").style.visibility = "hidden";
+    document.getElementById("botonAmpE").style.visibility = "hidden";        
+    document.getElementById("buscarCortes").style.visibility = "hidden" ;
   }
   fm=ev.target.id; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer-getData() solo se puede conocer en el "drop"
 }
@@ -1238,7 +1244,7 @@ function aceptarJugada() {
   document.getElementById("aceptarJugada").style.display = "none";
   document.getElementById("cancelarJugada").style.display = "none";
   document.getElementById("Cambio").style.display = "inline";
-  document.getElementById("Jugada").style.display = "inline";
+  document.getElementById("Jugada").style.visibility = "visible";
   nfj = numFichasJ0 - filaJugador.cells.length; 
   if (nfj > 0) {
     fichaJugada = true
@@ -1253,7 +1259,7 @@ function cancelarJugada() {
   document.getElementById("aceptarJugada").style.display = "none";
   document.getElementById("cancelarJugada").style.display = "none";
   document.getElementById("Cambio").style.display = "inline";
-  document.getElementById("Jugada").style.display = "inline";
+  document.getElementById("Jugada").style.visibility = "visible";
 
   reponerTabla();
   document.getElementById("tablaJugador").deleteRow(1);
@@ -1448,8 +1454,9 @@ function esSerie(arr) {
 // no tiene en cuenta los demás atributos
 function ordenarFila(arr, fila) {
   var filaArr = [...fila.cells];
+  
   for (let i =0 ; i < arr.length; i++) {
-    filaArr[i].id = "M" + arr[i];
+    if (fila.id === "filaJugador") filaArr[i].id = "F" + arr[i]; else filaArr[i].id = "M" + arr[i];
     filaArr[i].innerHTML = arr[i] % 100;
     filaArr[i].style.color = arrayColores[Math.floor(arr[i] / 100)];
   }
@@ -1496,7 +1503,7 @@ function copiarTabla() {
  
     filaJ = document.createElement("tr");
     document.getElementById("tablaJugador").appendChild(filaJ);
-    filaJ.style.display = "inline";
+    filaJ.style.display = "none";
     filaJ.id = "filaJugadorBis";
     for (let j = 0; j < filaJugador.cells.length; j++ ) {
         var cell = filaJ.insertCell(-1);
@@ -1540,7 +1547,7 @@ function reponerTabla() {
     filaJugador.deleteCell(0);
     for (let j = 0; j < filaJugadorBis.cells.length; j++) {
       var cell = filaJugador.insertCell(-1);
-      cell.id = filaJugadorBis.cells[j].id;
+      cell.id = 'F' + filaJugadorBis.cells[j].id.substr(1);
       cell.innerHTML = filaJugadorBis.cells[j].innerHTML;
     cell.style.color = filaJugadorBis.cells[j].style.color;
     cell.className = "figuraFicha";
@@ -1573,22 +1580,22 @@ var botonesJugadasVisibles = false;
 function verBotonesJugadas() {
   if (botonesJugadasVisibles) {
 
-    document.getElementById("Jugadas").innerHTML = "Jugadas >";
-    document.getElementById("Sugerir").style.display = "none";
-    document.getElementById("botonSeries").style.display = "none";
-    document.getElementById("botonEscaleras").style.display = "none";
-    document.getElementById("botonAmpS").style.display = "none";
-    document.getElementById("botonAmpE").style.display = "none";        
-    document.getElementById("buscarCortes").style.display = "none" ;  
+    document.getElementById("Jugada").innerHTML = "Jugadas >";
+    document.getElementById("Sugerir").style.visibility = "hidden";
+    document.getElementById("botonSeries").style.visibility = "hidden";
+    document.getElementById("botonEscaleras").style.visibility = "hidden";
+    document.getElementById("botonAmpS").style.visibility = "hidden";
+    document.getElementById("botonAmpE").style.visibility = "hidden";        
+    document.getElementById("buscarCortes").style.visibility = "hidden" ;  
   }
   else {
     document.getElementById("Jugada").innerHTML = "Jugadas <";
-    document.getElementById("Sugerir").style.display = "inline";
-    document.getElementById("botonSeries").style.display = "inline";
-    document.getElementById("botonEscaleras").style.display = "inline";
-    document.getElementById("botonAmpS").style.display = "inline";
-    document.getElementById("botonAmpE").style.display = "inline";        
-    document.getElementById("buscarCortes").style.display = "inline"; 
+    document.getElementById("Sugerir").style.visibility = "visible";
+    document.getElementById("botonSeries").style.visibility = "visible";
+    document.getElementById("botonEscaleras").style.visibility = "visible";
+    document.getElementById("botonAmpS").style.visibility = "visible";
+    document.getElementById("botonAmpE").style.visibility = "visible";        
+    document.getElementById("buscarCortes").style.visibility = "visible"; 
   }
   botonesJugadasVisibles = !botonesJugadasVisibles;
 }
