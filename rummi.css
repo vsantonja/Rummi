@@ -19,20 +19,6 @@ nav {
   padding: 20px;
 }
 
-article {
-  float: left;
-  padding: 20px;
-  width: 70%;
-  background-color: #f1f1f1;
-}
-
-/* Clear floats after the columns */
-section:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
 /* Style the footer */
 footer {
   background-color: #777;
@@ -60,7 +46,6 @@ footer {
   padding: 10px 10px;
   color:  darkred;
 }
-
 
 
 .figuraFicha{
@@ -120,32 +105,6 @@ footer {
         border-radius: 10px;  
         /* border: 2px solid white; */
 } 
-/* 
-.figuraFichaMarcada {
-    background-color:goldenrod;
-    width: 30px;
-    height: 40px;
-    text-align: center;
-    font-weight: bold;
-    border-radius: 10px;  
-    border: 2px solid white;
-} */
-
-.figuraProvisional {
-    background-color:lightgreen;
-    width: 30px;
-    height: 40px;
-    text-align: center;
-    font-weight: bold;
-    border-radius: 10px;  
-    /* border: 2px solid lightgreen; */
-    /* 
-    color: lightgreen */
-} 
-body {
-        font-size: 14px;
-        font-family: Arial, Helvetica, sans-serif;
-    }
 
 .center_varios {
         display: flex; justify-content: center; 
