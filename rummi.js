@@ -9,7 +9,7 @@ var fichaJugada = false;
 var numFichasJ0;
 var modoCancelable = false;
 
-/*****************************************************************************/
+
 /*****************************************************************************/
 /*****************************************************************************/
 /**************************                        ***************************/
@@ -17,17 +17,11 @@ var modoCancelable = false;
 /**************************                        ***************************/
 /*****************************************************************************/
 /*****************************************************************************/
-/*****************************************************************************/
 
-// function allowDrop(ev) { 
-//   ev.preventDefault();
-//   ev.target.classList.add('permiso');
-// }
 function dragStart(ev) { 
   ev.dataTransfer.setData("text", ev.target.id);
   if (!modoCancelable) {
     modoCancelable = true;
-  //  numFichasJ0 = document.getElementById("filaJugador").cells.length;
     numFichasJ0 = filaJugador.cells.length;
     copiarTabla();
     document.getElementById("aceptarJugada").style.display = "inline";
@@ -43,23 +37,18 @@ function dragStart(ev) {
     textoJ.innerHTML = "TURNO JUGADOR: operació cancelable. Al terminar con el movimiento de fichas debe Aceptar o Cancelar";
     if (traza) console.log("Inicio arrrastre de ficha" + ev.target.id);
   }
-  fm=ev.target.id; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer-getData() solo se puede conocer en el "drop"
+  fm=ev.target; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer-getData() solo se puede conocer en el "drop"
 }
 
-// function dragStartMesa(ev) { 
-//   ev.dataTransfer.setData("text", ev.target.id);
-//   ev.target.setAttribute("previousRow", ev.target.parentElement().id);
-//   fm=ev.target.id; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer-getData() solo se puede conocer en el "drop"
-// }
 
-//////////////////////////////////////////////////////////////////
+//*****************************************************************************
 //función asociada al evento dragover
 function allowDrop(ev) { 
   var arr = [];
   if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
     arr = filaFichasAArrayCodigos(ev.target.parentElement);
-    arr = arr.concat(document.getElementById(fm).id.substr(1)); 
-   //arr = arr.concat(fm.id.substr(1)); 
+    //arr = arr.concat(document.getElementById(fm).id.substr(1)); 
+    arr = arr.concat(fm.id.substr(1)); 
   }
   if (validaSim(arr) != -1) {
     ev.preventDefault();
@@ -74,19 +63,20 @@ function allowDrop(ev) {
 function dragDrop(ev) { 
  
   ev.preventDefault(); 
-  var data = ev.dataTransfer.getData("text");
-  var fichaMovil = document.getElementById(data);
+  //var data = ev.dataTransfer.getData("text");
+  //var fichaMovil = document.getElementById(data);
+  var fichaMovil = fm;
   var fichasOrig = fichaMovil.parentElement;
   var fromMesa = false; 
   if (fichaMovil.id.startsWith('M')) {
     fromMesa = true; 
   }
-  fichaMovil.id = "M" + data.substr(1);
+  fichaMovil.id = "M" + fm.id.substr(1);
   if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
     //Si solo había una ficha en la fila las pongo ordenadas
     filaMesa = ev.target.parentElement;
     if (filaMesa.cells.length == 1) { 
-      if ((data.substr(1) - ev.target.id.substr(1)) < 0) {
+      if (fm.id.substr(1) - ev.target.id.substr(1) < 0) {
         filaMesa.insertBefore(fichaMovil, ev.target);
       } else {
         filaMesa.appendChild(fichaMovil); 
@@ -101,7 +91,7 @@ function dragDrop(ev) {
     hazNoDropable(ev.target);
     removeStyle(ev);
   } // no suelta en una filas existente
-  if (fromMesa) marcarFilaMesa(fichasOrig, false);
+  if (fromMesa && (fichasOrig)) marcarFilaMesa(fichasOrig, false);
   marcarFilaMesa(filaMesa, false);
   if (traza) console.log("Ficha depositada junto a" + ev.target.id);
 }
@@ -155,7 +145,6 @@ function hazNoDropable(ficha) {
 
 
 ////////////////////////////////////////////////////////////////
-
 function validaSim(arr) {
   var len = arr.length;
   if (len >= 3 && !esSerie(arr) && !esEscalera(arr)) {  
@@ -536,9 +525,7 @@ function buscarSeries(jugador) {
   // "S-3": lo + grande que hay son una o varias series de 3
   // "S-2": lo + grande que hay son una o varias series de 2 que se pueden completar con una ficha del la mesa
 
-  
-  if (cuentaS3 > 0) {
-
+    if (cuentaS3 > 0) {
     var aux1=series.map(el => el.length);
     var serLenMax = aux1.sort((a, b) => b - a)[0];
     for (let k = 0; k < series.length; k++) {
@@ -938,7 +925,7 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado, fichaDeL
 /*********   El computador calcula su jugada *************************************** */
 /*********************************************************************************** */
 function jugadaComp() {
-
+  var mensaje = '';
   for (let stop = 8; stop; stop--) { // 8 es una salvaguarda para que no se hagan inf iteraciones
     var bs = buscarSeries(false);
     var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
@@ -957,11 +944,11 @@ function jugadaComp() {
           console.log("no AmSer");
           if (!buscarCortes(false)) {
             console.log("no Cortes");
-            textoJ.innerHTML = "TURNO COMPUTADOR: pulse en CAMBIO para pasar el turno al jugador";
+            textoJ.innerHTML = "TURNO COMPUTADOR:<br>" + "Jugadas computador: " + mensaje + "<br> Ppulse CAMBIO para pasar el turno al jugador";
            return;
-          } else textoJ.innerHTML = "TURNO COMPUTADOR: corte";
-        } else textoJ.innerHTML = "TURNO COMPUTADOR: amplío serie";
-      } else textoJ.innerHTML = "TURNO COMPUTADOR: amplío serie";
+          } else mensaje += "corte";
+        } else textoJ.innerHTML += "- amplío serie";
+      } else textoJ.innerHTML += " - amplío escalera";
     }
     directo = false;
     //alert("jugada encontrada");
@@ -1287,6 +1274,7 @@ function obtenerCodigo(arr) {
     codigo = "E-" + arr.length + "-" + arr[0] % 100 + "-" +  Math.floor(arr[0] / 100);
   } else {  // es una serie
     codigo = "S-" + arr.length + "-" + arr[0] % 100 + "-";
+    ordenar(arr);
     if (arr.length == 3){ // si es una S-3 hay que calcular el color excluido
       for (let i = 0; i < 3; i++) {
         if ( Math.floor(arr[i] / 100) != i) {
@@ -1559,7 +1547,6 @@ function proclamarGanador(jugador) {
 }
 
 function ordenarColor(){
-//var filaJugador = document.getElementById("filaJugador");
 var arr =filaFichasAArrayCodigos(filaJugador);
 ordenar(arr);
 ordenarFila(arr,filaJugador);  
@@ -1567,7 +1554,6 @@ ordenarFila(arr,filaJugador);
 
 
 function ordenarValor(){
-  //var filaJugador = document.getElementById("filaJugador");
   var arr =filaFichasAArrayCodigos(filaJugador);
   arr= codifValor(arr);
   ordenar(arr);
