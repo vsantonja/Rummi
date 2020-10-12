@@ -74,6 +74,10 @@ footer {
   background-color: rgb(255, 241, 113)
 }
 
+.figuraFicha.joker{
+  background-color: palevioletred;
+}
+
 .Rummy{
     /* background-color: rgb(158, 230, 136);   */
     width: 30px;

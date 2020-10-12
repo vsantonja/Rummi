@@ -91,9 +91,15 @@ function dragDrop(ev) {
     hazNoDropable(ev.target);
     removeStyle(ev);
   } // no suelta en una filas existente
-  if (fromMesa && (fichasOrig)) marcarFilaMesa(fichasOrig, false);
-  marcarFilaMesa(filaMesa, false);
-  if (traza) console.log("Ficha depositada junto a" + ev.target.id);
+  if (fromMesa) {
+    if (fichasOrig.cells.length == 0) {
+      fichasOrig.parentNode.removeChild(fichasOrig);
+    } else {
+      marcarFilaMesa(fichasOrig, false);
+    }
+  }
+    marcarFilaMesa(filaMesa, false);
+    if (traza) console.log("Ficha depositada junto a" + ev.target.id);
 }
 
 function hazDropable(ficha) {
