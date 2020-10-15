@@ -102,6 +102,8 @@ function dragDrop(ev) {
     if (traza) console.log("Ficha depositada junto a" + ev.target.id);
 }
 
+
+//*****************************************************************************
 function hazDropable(ficha) {
   ficha.setAttribute("ondrop","dragDrop(event)");
   ficha.setAttribute("ondragover","allowDrop(event)");
@@ -171,23 +173,35 @@ function validaSim(arr) {
 //////////////////////////////////////////////////////////////////////////////
 // funcion asociada al evento "ondrop" sobre el final de las fichas de la mesa
 function dragDropFin(ev) { 
-    ev.preventDefault(); 
-    var data = ev.dataTransfer.getData("text");
-    var fichaMovil = document.getElementById(data);
-    var fichasOrig =fichaMovil.parentElement;
-    var fromMesa = false; 
-    if (fichaMovil.id.startsWith('M')) {
-     fromMesa = true; 
+  ev.preventDefault(); 
+  // var data = ev.dataTransfer.getData("text");
+  // var fichaMovil = document.getElementById(data);
+  var fichaMovil = fm;
+  var fichasOrig =fichaMovil.parentElement;
+  var fromMesa = false; 
+  if (fichaMovil.id.startsWith('M')) {
+    fromMesa = true; 
+  }
+  var ultimaFila = document.createElement("tr");
+  var tablaMesa = document.getElementById("tablaMesa");
+  tablaMesa.appendChild(ultimaFila);
+  ultimaFila.appendChild(hazDropable(fichaMovil));
+  ev.target.removeAttribute("style");
+  filaMesa = ultimaFila;
+  filaMesa.id = "X-filaMesa";
+  fichaMovil.id = "M" + fm.id.substr(1);   // document.getElementById("Cambio").innerHTML="Cambio turno";
+ //if (fromMesa) marcarFilaMesa(fichasOrig, false);
+
+  if (fromMesa) {
+    if (fichasOrig.cells.length == 0) {
+      fichasOrig.parentNode.removeChild(fichasOrig);
+    } else {
+      marcarFilaMesa(fichasOrig, false);
     }
-    var ultimaFila = document.createElement("tr");
-    var tablaMesa = document.getElementById("tablaMesa");
-    tablaMesa.appendChild(ultimaFila);
-    ultimaFila.appendChild(hazDropable(fichaMovil));
-    ev.target.removeAttribute("style");
-    filaMesa = ultimaFila;
-    filaMesa.id = "X-filaMesa";
-    fichaMovil.id = "M" + data.substr(1);   // document.getElementById("Cambio").innerHTML="Cambio turno";
-  if (fromMesa) marcarFilaMesa(fichasOrig, false);
+  }
+  if (traza) console.log("Se crea un nuevo grupo en la mesa");
+
+  
 }
 
 
@@ -766,17 +780,18 @@ function robarFicha(jugador) {
 }
 
 if (jugador) {
-  if (traza) console.log("***************************** Turno COMPUTADOR *******************************");
+  if (traza) console.log("************* Turno COMPUTADOR **************");
   jugadaComp();
   document.getElementById("Sugerir").style.visibility="hidden"; 
   robarFicha(false);
   document.getElementById("numeroFichas").innerHTML = (document.getElementById("filaMaquina").cells.length) + " fichas";
   setTimeout(aviso, 1000);
   function aviso() {
-    alert("TURNO COMPUTADOR: jugada concluída: Cambio a TURNO JUGADOR");
+    alert("TURNO COMPUTADOR: jugada concluída: " + mensaje + " - Cambio a TURNO JUGADOR");
+    mensaje ="";
   }
 } else {
-  if (traza) console.log("***************************** Turno JUGADOR *******************************");
+  if (traza) console.log("************** Turno JUGADOR ****************");
   textoJ.innerHTML = "TURNO JUGADOR: arrastre fichas del jugador, de la mesa o pida sugerencia";
   document.getElementById("Jugada").style.visibility="visible"; 
 }
@@ -930,17 +945,19 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado, fichaDeL
 /*********************************************************************************** */
 /*********   El computador calcula su jugada *************************************** */
 /*********************************************************************************** */
+var mensaje = "";
 function jugadaComp() {
-  var mensaje = '';
-  for (let stop = 8; stop; stop--) { // 8 es una salvaguarda para que no se hagan inf iteraciones
+    for (let stop = 8; stop; stop--) { // 8 es una salvaguarda para que no se hagan inf iteraciones
     var bs = buscarSeries(false);
     var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
     var be = buscarEscaleras(false);
     var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
     if (ne > ns) {
       buscarEscaleras(false);
-    } else {
+      mensaje = mensaje + " - escalera de " + ne + " fichas";
+    } else if (ne!= 0 || ns !=0) {
       buscarSeries(false);
+      mensaje = mensaje + " - serie de " + ns + " fichas";
     }
     if (ne == 0 && ns == 0) {
       console.log("no Ser y Esc");
@@ -950,11 +967,11 @@ function jugadaComp() {
           console.log("no AmSer");
           if (!buscarCortes(false)) {
             console.log("no Cortes");
-            textoJ.innerHTML = "TURNO COMPUTADOR:<br>" + "Jugadas computador: " + mensaje + "<br> Ppulse CAMBIO para pasar el turno al jugador";
+            textoJ.innerHTML = "TURNO COMPUTADOR:<br>" + "Jugadas computador: pulse CAMBIO para pasar el turno al jugador";
            return;
-          } else mensaje += "corte";
-        } else textoJ.innerHTML += "- amplío serie";
-      } else textoJ.innerHTML += " - amplío escalera";
+          } else mensaje  = mensaje + " - corte";
+        } else mensaje = mensaje + "- amplío serie";
+      } else mensaje = mensaje + " - amplío escalera";
     }
     directo = false;
     //alert("jugada encontrada");
@@ -1165,29 +1182,35 @@ function buscarCortes(jugador) {
 function aceptarJugada() {
   modoCancelable = false;
   var gruposMesa = [...document.getElementById("tablaMesa").rows];
-  var grupo =[];
-   
+  //  var grupo =[];
   // si hay grupos de 1 o de 2 los elimina y devuelve la fichas a la mano del jugador
-  const longRows = gruposMesa.length;
-  for (let i = longRows - 1; i > 0 ; i--) { //recuerda que i=0 es rummy
+  // IMPOSIBLE !!!
+  // const longRows = gruposMesa.length;
+  // for (let i = longRows - 1; i > 0 ; i--) { //recuerda que i=0 es rummy
+  //   if (gruposMesa[i].cells.length < 3) {
+  //   grupo[i] = gruposMesa[i].cells;
+  //   const longCells =  grupo[i].length;
+  //     for (let j=0; j < longCells; j++) {
+  //       grupo[i][0].id = 'F' + grupo[i][0].id.substr(1); 
+  //     filaJugador.appendChild(grupo[i][0]); 
+  //     }
+  //     document.getElementById("tablaMesa").deleteRow(-1);
+  //   }
+  // }
+  // limpiaFila(filaJugador);
+  // hazDraggable(filaJugador);
+  for (let i = 1; i < gruposMesa.length; i++) { //recuerda que i=0 es rummy
     if (gruposMesa[i].cells.length < 3) {
-    grupo[i] = gruposMesa[i].cells;
-    const longCells =  grupo[i].length;
-      for (let j=0; j < longCells; j++) {
-        grupo[i][0].id = 'F' + grupo[i][0].id.substr(1); 
-      filaJugador.appendChild(grupo[i][0]); 
-      }
-      document.getElementById("tablaMesa").deleteRow(-1);
+      textoJ.innerHTML = "Esta jugada no se puede aceptar. Cancele y haga una nueva jugada";    
+      return;
     }
   }
-  limpiaFila(filaJugador);
-  hazDraggable(filaJugador);
   document.getElementById("tablaJugador").deleteRow(1);
   document.getElementById("aceptarJugada").style.display = "none";
   document.getElementById("cancelarJugada").style.display = "none";
   document.getElementById("Cambio").style.display = "inline";
   document.getElementById("Jugada").style.visibility = "visible";
-  nfj = numFichasJ0 - filaJugador.cells.length; 
+  var nfj = numFichasJ0 - filaJugador.cells.length; 
   if (nfj > 0) {
     fichaJugada = true
     document.getElementById("Cambio").innerHTML="Cambio turno";
@@ -1207,14 +1230,13 @@ function cancelarJugada() {
   reponerTabla();
   document.getElementById("tablaJugador").deleteRow(1);
 
-  //nfj = numFichasJ0 - document.getElementById("filaJugador").cells.length;
-  nfj = numFichasJ0 - filaJugador.cells.length;
-  if (nfj > 0) {
-    fichaJugada = true;
-    document.getElementById("Cambio").innerHTML="Cambio turno";
-    document.getElementById("Cambio").classList.remove("btn-danger");
-    document.getElementById("Cambio").classList.add("btn-primary");
-  } 
+  // nfj = numFichasJ0 - filaJugador.cells.length;
+  // if (nfj > 0) {
+  //   fichaJugada = true;
+  //   document.getElementById("Cambio").innerHTML="Cambio turno";
+  //   document.getElementById("Cambio").classList.remove("btn-danger");
+  //   document.getElementById("Cambio").classList.add("btn-primary");
+  // } 
 }
 
 //************************************************************************** */
