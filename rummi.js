@@ -1205,7 +1205,7 @@ function aceptarJugada() {
       return;
     }
   }
-  document.getElementById("tablaJugador").deleteRow(1);
+  document.getElementById("tablaJugador").deleteRow(1); // borro tablaJugadorDest
   document.getElementById("aceptarJugada").style.display = "none";
   document.getElementById("cancelarJugada").style.display = "none";
   document.getElementById("Cambio").style.display = "inline";
@@ -1448,7 +1448,6 @@ function copiarTabla() {
  
     var tablaDest = document.getElementById('tablaDest');
     var tablaMesa = document.getElementById('tablaMesa');
-    //var filaJugador = document.getElementById('filaJugador');
 
     numrows = tablaDest.rows.length;
     for (let i = 0; i < numrows; i++) {
@@ -1505,22 +1504,21 @@ function reponerTabla() {
     }
     if (i!= 0) marcarFilaMesa(row,true);
   }
-
-  //var filaJugador = document.getElementById('filaJugador');
-  var filaJugadorBis = document.getElementById('filaJugadorBis');
   var long = filaJugador.cells.length;
-  for (let i = 0; i < long; i++)
-    filaJugador.deleteCell(0);
-    for (let j = 0; j < filaJugadorBis.cells.length; j++) {
-      var cell = filaJugador.insertCell(-1);
-      cell.id = 'F' + filaJugadorBis.cells[j].id.substr(1);
-      cell.innerHTML = filaJugadorBis.cells[j].innerHTML;
+    for (let i = 0; i < long; i++) {  // borro la fila actual
+      filaJugador.deleteCell(0);
+    }
+  var filaJugadorBis = document.getElementById('filaJugadorBis');
+  for (let j = 0; j < filaJugadorBis.cells.length; j++) {
+    var cell = filaJugador.insertCell(-1);
+    cell.id = 'F' + filaJugadorBis.cells[j].id.substr(1);
+    cell.innerHTML = filaJugadorBis.cells[j].innerHTML;
     cell.style.color = filaJugadorBis.cells[j].style.color;
     cell.className = "figuraFicha";
-    }
-    limpiaFila(filaJugador);
-    hazDraggable(filaJugador);
-    textoJ.innerHTML = "TURNO JUGADOR: operación cancelada. Arrastre fichas del jugador, de la mesa o pida una sugerencia";
+  }
+  limpiaFila(filaJugador);
+  hazDraggable(filaJugador);
+  textoJ.innerHTML = "TURNO JUGADOR: operación cancelada. Arrastre fichas del jugador, de la mesa o pida una sugerencia";
   }
 
 
@@ -1574,17 +1572,31 @@ function proclamarGanador(jugador) {
 
 }
 
-function ordenarColor(){
-var arr =filaFichasAArrayCodigos(filaJugador);
-ordenar(arr);
+let ordenXColor = true;
+function ordenarValorOColor(){
+  let arr =filaFichasAArrayCodigos(filaJugador);
+  if (ordenXColor) {
+    arr= codifValor(arr);
+    ordenar(arr);
+    arr= codifColor(arr);
+    ordenarFila(arr,filaJugador);  
 ordenarFila(arr,filaJugador);  
-}
-
-
-function ordenarValor(){
-  var arr =filaFichasAArrayCodigos(filaJugador);
-  arr= codifValor(arr);
-  ordenar(arr);
-  arr= codifColor(arr);
+    ordenarFila(arr,filaJugador);  
+ordenarFila(arr,filaJugador);  
+    ordenarFila(arr,filaJugador);  
+ordenarFila(arr,filaJugador);  
+    ordenarFila(arr,filaJugador);  
+    document.getElementById("ordenarValorOColor").innerHTML = "Ord.Color";
+  } else {
+    ordenar(arr);
+    ordenarFila(arr,filaJugador);  
   ordenarFila(arr,filaJugador);  
+    ordenarFila(arr,filaJugador);  
+  ordenarFila(arr,filaJugador);  
+    ordenarFila(arr,filaJugador);  
+  ordenarFila(arr,filaJugador);  
+    ordenarFila(arr,filaJugador);  
+    document.getElementById("ordenarValorOColor").innerHTML = "Ord.Valor";
+  }
+  ordenXColor = !ordenXColor;
 }
