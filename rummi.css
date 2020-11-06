@@ -1,16 +1,19 @@
 * {
-  box-sizing: content-box;
-  font-size: 14px;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
 } 
 
 
 body{
   background-color: grey;
-}
+}  
 
 h4{
-  padding: 0px;
+  padding: 5px 0px;
   margin: 0px;
+  margin-left: 100px;
+  font-size: 20px;
 }
 
 table {
@@ -31,20 +34,6 @@ table {
     padding: 0px;
 }
 
-#numeroFichas{
-  background-color:white;
-  width: 60px;
-  height: 300px;
-  text-align: center;
-  font-weight: bold;
-  border-radius: 10px;
-  border: 0px solid gray;
-  margin-right: 3px;
-  box-shadow: 4px 4px 2px #353535;
-  padding: 0px;
-}
-
-
 .figuraFicha.permiso{
   background-color: darkgreen;
 }
@@ -62,70 +51,83 @@ table {
 }
 
 .figuraFicha.joker{
-  background-color: rgb(219, 133, 192);
+  background-color: rgb(204, 164, 191);
 }
 
-#general{
-  margin: auto;
+
+
+#cabecera{
   margin-top: 0px;
-  width: 1080px;
-  /* height: 800px; */
-  /* background-color: darkolivegreen; */
-}
-#cabecera{ 
+  width: 1200px;
+  height: 35px;
   background-color: grey; 
-  padding: 3 3 3 10px; 
 } 
+
+#botonera{
+  float: left;
+  width:400px;
+}
+
+#textoJugador{
+  height: 35;
+  vertical-align: middle;
+  background-color:rgb(210, 210, 210);
+  padding: 8px;
+  margin-left:400px;
+}
 
 #cuerpo{ 
-  margin: 10 0 10 0px; 
-} 
+  margin: 0px;
+  top: 100px;
+  width: 1200px;
+  height:424px 
+ } 
+
+
+ #principal{
+ 
+ } 
 
 #botonesjugadas, #ajustesComodin{
+  float:left;
+  /* top: 300px; */
+  left: 5px;
   margin: 0px; 
-  margin-top:22px;
-  float: left;
   width: 100px;
-  height: 424px;
+  height: 550px;
   background-color: darkslategrey;
 }
 
 #ajustesComodin {
-  padding-left: 0px;
+  float: left;
+  padding-left: 15px;
   color:gray;
-}
-
-
-#textoJugador{
-  float: right;
-  width: 600px;
-  background-color:rgb(210, 210, 210);
 }
 
 .btnjugada, .btn{
   background-color: lightgray;
-  width: 85px;
+  width: 100px;
   height: 35px;
   text-align: center;
   border: 2px solid darkslategrey;
   padding: 5px;
 }
 
-
 .btn{
   background-color:#1b0788;
   width: auto;
-  color: white
+  color: white;
 }
 
 .btn:hover{
   background-color:#9a8ce7;
-  color: #1b0788
+  color: #1b0788;
 }
 
 .btnjugada:hover{
   background-color:black;
-  color: lightgray
+  z-index: 1;
+  color: lightgray;
 }
 
 .btn:active {
@@ -140,7 +142,7 @@ table {
 }
 
 .btn-rojo:hover{
-  background-color: white;
+  background-color: pink;
   color: red;
 }
 
@@ -149,11 +151,21 @@ table {
   color:white;
 }
 
-.btn-verde:hover¨{
-  background-color: white;
+.btn-verde:hover{
+  background-color: lightgreen;
   color: green;
 }
 
+
+.btn-naranja {
+  background-color: darkorange;
+  color:white;
+}
+
+.btn-naranja:hover{
+  background-color: rgb(247, 194, 96);
+  color:rgb(194, 105, 3);
+}
 
 .fill-auto{
   column-fill: auto;
@@ -167,7 +179,13 @@ table {
     border: 2px solid rgb(158, 230, 136);
 }     
 */
-    
+   
+#zonaJugador {
+  margin-left: 100px;
+}
+
+
+
 #zonaMesa{
     background-color: green;
     color:  lightgreen;
@@ -176,7 +194,8 @@ table {
     text-align: center;
     vertical-align:text-bottom;
     padding: 5px 0px 40px;
-    margin-left: 100px;
+    margin-left: 101px;
+    z-index: -1;
 }    
 
 
@@ -212,7 +231,15 @@ table {
 
 .center_varios {
         display: flex; 
-        margin-left: auto;
-        margin-right: auto;
+       /* margin-left: auto;
+        margin-right: auto; */
     }
 
+
+    
+    
+#zonaComp{
+    margin-left: 100px;
+
+
+}

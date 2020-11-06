@@ -1,4 +1,4 @@
-const arrayColores = ["black", "red", "blue", "magenta"];
+const arrayColores = ["black", "red", "blue", "green"];
 var filaMesa;
 var arrayMesa;
 var fm; 
@@ -165,9 +165,7 @@ function dragDropFin(ev) {
 
   var tablaMesa = document.getElementById("tablaMesa");
   var le = tablaMesa.rows.length;
-  //  if (( le % 4 == 1) && le > 1) { // hay un número impar de filas (fila rummi)
-  //    quitarFakes(le);
-  // }
+  
 
   tablaMesa.appendChild(ultimaFila);
   ultimaFila.appendChild(hazDropable(fm));
@@ -183,26 +181,8 @@ function dragDropFin(ev) {
     }
   }
 
-  //chapuza para que no se partan las fichas en el multcolumn
-  // if (tablaMesa.rows.length % 2  == 0) { // hay un número impar de filas (fila rummi)
-  //   var fakeFila = document.createElement("tr");
-  //   tablaMesa.appendChild(fakeFila);
-  //   var fakeFicha = document.createElement("td");
-  //   fakeFicha.className = "figuraFicha";
-  //   fakeFila.appendChild(fakeFicha);
-  //  //fakeFicha.style.visibility="hidden";
-  
-  // }
   if (traza) console.log("Se crea un nuevo grupo en la mesa"); 
 }
-
-// function quitarFakes(le){
-//   var tablaMesa = document.getElementById("tablaMesa");
-//   for (let i=le - 1; i ; i--) {
-//     if (tablaMesa.rows[i].cells[0].innerHTML == "");
-//       tablaMesa.deleteRow(i);
-//   }
-//  }
 
 
 function removeStyle(ev) {
@@ -278,6 +258,9 @@ var sacoVisible = true;
 function nuevoJuego() {
   location.reload();
 }
+
+function inicio() {iniciar(0);}
+
 
 function iniciar(prueba) {
   textoJ = document.getElementById("textoJugador");
