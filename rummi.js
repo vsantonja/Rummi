@@ -198,6 +198,7 @@ function defineJoker(){
   textoJ.innerHTML = "Selecciona valor del Comodín";
   // document.getElementById("btnValor").onclick;
   document.getElementById("fvalores").style.display = "inline";
+  document.removeEventListener(click);
 }
 
 //******************************************************************************
@@ -310,6 +311,7 @@ function iniciar(prueba) {
       if (ficha.id == "S415" || ficha.id == "S416") {
         ficha.classList.add("joker");
         ficha.innerHTML = "J";
+        ficha.addEventListener("click",  avisoComodin);
         ficha.addEventListener("dblclick",  defineJoker);
       } else {
         ficha.addEventListener("dblclick",  seleccionarGrupo);
@@ -364,8 +366,10 @@ function repartirFichas() {
   for (let i = 0; i < 14; i++) {  //... y las 14 fichas del jugador
     ficha = fichasSaco.pop();
     ficha.id = 'F' + ficha.id.substr(1); 
-    ficha.draggable = "true";
-    ficha.setAttribute("ondragstart", "dragStart(event)");
+    if (ficha.innerHTML != 'J') {
+      ficha.draggable = "true";
+      ficha.setAttribute("ondragstart", "dragStart(event)");
+    }
     filaJugador.appendChild(ficha);
   }
 
@@ -1052,7 +1056,7 @@ function buscarCortes(jugador) {
         }
       }
 
-      if (!cortadoIzda) {
+      if (!cortadoDcha) {
         for (let k = 1; k <= Math.floor((arrGM.length-1)/2); k++) { // cortes por la dcha
           if (k == 1) {
             if ((arrJ[i] == (arrGM[arrGM.length - 3]))  && (arrJ[i+1] == arrGM[arrGM.length -2])) {
@@ -1388,8 +1392,10 @@ function limpiaFila(fichas) {
 
 function hazDraggable(fichas) {
   for (let i = 0; i < fichas.cells.length; i++ ) {
+    if (fichas.cells[i].innerHTML != 'J') {
       fichas.cells[i].draggable = "true";
       fichas.cells[i].setAttribute("ondragstart", "dragStart(event)");
+    }
   } 
 }   
 
@@ -1626,4 +1632,10 @@ function ordenarValorOColor(){
     document.getElementById("ordenarValorOColor").innerHTML = "Ord. x Valor";
   }
   ordenXColor = !ordenXColor;
+}
+
+
+function avisoComodin(){
+  textoJ.innerHTML = "Comodin. Antes de arrastarla debe asignarle un valor y color concreto. Haga doble click sobre la ficha"
+
 }

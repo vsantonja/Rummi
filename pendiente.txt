@@ -1,0 +1,13 @@
+Pendientes:
+
+---  No encuentra cortes   5A  5V en Jugador   y  2N 3N 4N 5N  no encuentra el trio de 5s
+
+     Solo trata escaleras (no series) de más de 3 fichas
+
+
+
+
+
+
+---  Idem para Computador 2v 3v en mesa 1n 1r 1v 1a y no encuentra la escalera 1v 2v 3v
+---  Gestionar comodines
