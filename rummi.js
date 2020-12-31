@@ -847,7 +847,7 @@ if (jugador) {
  // document.getElementById("Sugerir").style.display="none"; 
   robarFicha(false);
   document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substring(0,8) + (document.getElementById("filaMaquina").cells.length) + " fichas";
-  setTimeout(aviso, 200);
+  setTimeout(aviso, 1000);
   function aviso() {
     alert("COMPUTADOR: jugada concluída: " + mensaje + " - Cambio a TURNO JUGADOR");
     mensaje ="";
