@@ -10,10 +10,6 @@ var numFichasJ0;
 var modoCancelable = false;
 var eventoHecho = false;
 
-
-
-
-
 /*****************************************************************************/
 /*****************************************************************************/
 /**************************                        ***************************/
@@ -50,8 +46,8 @@ function dragStart(ev) {
 //función asociada al evento dragover
 function allowDrop(ev) { 
   var arr = [];
-  if (ev.target.tagName == "TD") {  // el jugador amplia un grupo prexistente 
-    //arr = arr.concat(document.getElementById(fm).id.substr(1)); 
+  if (ev.target.tagName == "TD") {  // el destino es una celda. 
+                                    // El jugador amplia un grupo prexistente 
     arr = filaFichasAArrayCodigos(ev.target.parentElement);
     arr = arr.concat(fm.id.substr(1));
   }
@@ -68,8 +64,6 @@ function allowDrop(ev) {
 function dragDrop(ev) { 
  
   ev.preventDefault(); 
-  //var data = ev.dataTransfer.getData("text");
-  //var fichaMovil = document.getElementById(data);
   var fichaMovil = fm;
   var fichasOrig = fichaMovil.parentElement;
   var fromMesa = false; 
@@ -256,7 +250,7 @@ var arraySaco = [];
 var modoDebug = false;
 var sacoVisible = true;
 
-function nuevoJuego() {
+ function nuevoJuego() {
   location.reload();
 }
 
@@ -288,13 +282,14 @@ function iniciar(prueba) {
         //       arraySaco[j] = k
         //     }
   } else {
-    arraySaco = [101,108,203,202,201,207,9,10,
-          103,303,106,306,006,109,203,6,206,204,107,205,206,13,
-          103,106,302,110,105,103,112,5,203,303,107,213,213,308];
+    arraySaco = [101, 108,  10, 203, 202, 201, 207,
+          103, 303, 106, 306, 007, 203,   6, 206, 204, 107, 205, 206, 13, 212,  // 14 fichas al jugador
+          103, 106, 302, 110, 105, 103, 112,   5, 203, 303, 107, 213, 308,  9]; // 14 fichas al computador
           arrayMesa =[
             [110, 210, 310],           // una serie de 3 dieces
             [1, 2, 3, 4, 5, 6, 7, 8],  // una esc de negros
-            [203, 204, 205]            // escalera azul
+            [203, 204, 205]          // escalera azul
+            
           ]  
   } 
   //conversión de números a fichas
@@ -516,13 +511,13 @@ function buscarSeries(jugador) {
     // un duo podria convertirse en serie de 3 con ayuda de una ficha de la mesa
     // exploramos esta posibilidad cuando no hay series en la mano
     } else if (tamSer[n] == 2) {
-      valorS2[n] = n;
+      valorS2[cuentaS2] = n + 1;
+      s2[cuentaS2]= codifColor(grupoValorSinDups[n]);
       cuentaS2++;
-      s2[n]= codifColor(grupoValorSinDups[n]);
     } else {
       series[n] =[];
       valorS[n]  = -1;
-      valorS2[n] = -1;
+    //  valorS2[cuentaS2] = -1;
   } 
   }
   var tablaMesa = document.getElementById("tablaMesa");
@@ -530,17 +525,19 @@ function buscarSeries(jugador) {
   var cont = 0;
   var meVoy = false;
   for (var contS4 = 0; contS4 < s4Mesa.length; contS4++) { 
-    if (meVoy == true) break;
-    for (var num of valorS2) {
-      if (meVoy == true) break;
-      if ((valorS2[num] + 1)== s4Mesa[contS4].id.split('-')[2]) {
+    if (meVoy) break;
+ //   for (var num of valorS2) {
+    for (var num = 0; num <= cuentaS2; num++) {
+      if (meVoy) break;
+      var v =valorS2[num];
+      if (v == s4Mesa[contS4].id.split('-')[2]) {
         for (var c=0; c < 4; c++) {
-          if ((s2[num].find(el => el == Number(c * 100 + num + 1))) == undefined)  { //un color que me interesa
+          if ((s2[num].find(el => el == Number(c * 100 + v))) == undefined)  { //un color (de los 2 posibles) que me interesa
             nuevaserie[cont] = s2[num].slice();
-            nuevaserie[cont].push(c * 100 + (num + 1)); 
+            nuevaserie[cont].push(c * 100 + v); 
             cont++;            
             meVoy = true; 
-            fichasel = c * 100 + (num + 1);
+            fichasel = c * 100 + v;
             break;
           }
         }
@@ -548,6 +545,42 @@ function buscarSeries(jugador) {
     }
   }
  
+
+
+  if (cont == 0) {
+//********************************************  NOU NOU NOU */
+// completar series de 2 fichas en la mano con una ficha de 
+// escalera de 4 o más en la mesa
+  var e4Mesa = [...tablaMesa.rows].filter(el => el.id.startsWith("E")).filter(el => !el.id.startsWith("E-3")); //selecciono las En (n>3)
+  var conte4omas = 0;
+  meVoy = false;
+  for (var contE4 = 0; contE4 < e4Mesa.length; contE4++) { 
+    if (meVoy) break;
+    for (var num = 0; num <= cuentaS2; num++) {
+      if (meVoy) break;
+      v =valorS2[num];
+      var posic;
+      if ((v == e4Mesa[contE4].id.split('-')[2]) ||
+          (v == parseInt(e4Mesa[contE4].id.split('-')[2]) + parseInt(e4Mesa[contE4].id.split('-')[1]) -1) ) {
+        if (v == e4Mesa[contE4].id.split('-')[2]) posic = 0;
+         else posic= parseInt(e4Mesa[contE4].id.split('-')[1]) -1;
+        for (c=0; c < 4; c++) {
+          if ((s2[num].find((el => el == Number(c * 100 + v))) == undefined ) &&
+                            (c ==  e4Mesa[contE4].id.split('-')[3]))  { //un color (de los 2 posibles) que me interesa
+            nuevaserie[conte4omas] = s2[num].slice();
+            nuevaserie[conte4omas].push(c * 100 + v); 
+            conte4omas++;            
+            meVoy = true; 
+            fichasel = c * 100 + v;
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+//************************************************** NOU NOU NOU */
+
  // representar las fichas ordenadas 
   var arr  = codifColor(fichasPost,true);
   for (let i = 0; i < fichasPost.length; i++) {
@@ -587,7 +620,15 @@ function buscarSeries(jugador) {
       textoJ.innerHTML = "JUGADOR: Haz doble click sobre la(s) serie(s) marcada(s) y una ficha de la mesa";
     } 
     ret = "S-2";
-  }    
+  } else if (conte4omas >0)   {
+    for (let i =0; i < nuevaserie.length; i++) {
+      var nuevoCodigoEMesa = "E-" + "  " + num + "-" + c;
+      var lado;
+      marcarFichas("s", nuevaserie[i], jugador, nuevoCodigoEMesa, lado, e4Mesa[contE4-1].cells[posic]);
+      textoJ.innerHTML = "JUGADOR: Haz doble click sobre la(s) serie(s) marcada(s) y una ficha de la mesa";
+    } 
+    ret = "S-2";
+  }
   if (traza) console.log(" devuelve un " + ret);
   return ret;
 }
@@ -688,15 +729,15 @@ function buscarEscaleras(jugador) {
     var gruposMesa = [...document.getElementById("tablaMesa").rows];
     for (let i = 0; i < cuentaE2; i++) {
       // para las esc de 2 elementos busco en la mesa una serie de 4 on una escalera de 
-      // 4 o 5 o 6 ...al que el pueda quitar la ficha que me falta: por la izda o 
+      // 4 o 5 o 6 ... al que le pueda quitar la ficha que me falta: por la izda o 
       // por la dcha. Las fichas que busco son las siguientes:
       var fichaIzda;
       var fichaDcha;
-      if (esc2[i][0] % 100 == 1) {fichaIzda = -1;}  // no hay ficha a la izda
+      if (esc2[i][0] % 100 == 1) {fichaIzda = -1;}  // no hay ficha a la izda (la escalera de 2 empieza con un 1)
       else {fichaIzda = esc2[i][0] - 1;}
 
-      if (esc2[i][1] % 100 == 13) fichaDcha = -1; // no hay ficha a la dcha
-      else fichaDcha =parseInt(esc2[i][1]) + parseInt(1);
+      if (esc2[i][1] % 100 == 13) fichaDcha = -1; // no hay ficha a la dcha (la escalera de 2 acaba con un 13)
+      else fichaDcha =parseInt(esc2[i][1]) + 1;
       // intento de ver si la fichaIzda está en la mesa
       posibleFichaIzda = document.getElementById("M" + fichaIzda);
       posibleFichaDcha = document.getElementById("M" + fichaDcha);
@@ -734,10 +775,11 @@ function buscarEscaleras(jugador) {
           }
           if (fichaAMover) {
             var cgm;
-            var esS4 = gruposMesa[f].id.startsWith("S-4-");
-            var esE = gruposMesa[f].id.startsWith("E-");
-            var mayorQue3 = (gruposMesa[f].id.split("-")[1] > 3);
-            if ( esS4 || (esE && mayorQue3)) {
+            var esS4 = gruposMesa[f].id.startsWith("S-4-"); // verdadero si es serie de 4
+            var esE = gruposMesa[f].id.startsWith("E-");    // verdadero si es escalera
+            var mayorQue3 = (gruposMesa[f].id.split("-")[1] > 3); // verdadero  si el grupo es mayor de 3
+            //if ( esS4 || (esE && mayorQue3)) {
+            if (mayorQue3) {
               esc2[i][2] =  fichaAMover.id.substr(1);
               if (esE) cgm = "E-" + (gruposMesa[f].id.split("-")[1]-1) + "-";
               marcarFichas("e", esc2[i], jugador, cgm, (porIzda?"izda":"dcha"),fichaAMover);
@@ -748,7 +790,7 @@ function buscarEscaleras(jugador) {
         }
       } 
       }
-      } else  {ret = "-1";}
+      } //else  {ret = "-1";}
     }
   }
   if (traza) console.log(" devuelve un " + ret);
@@ -805,7 +847,7 @@ if (jugador) {
  // document.getElementById("Sugerir").style.display="none"; 
   robarFicha(false);
   document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substring(0,8) + (document.getElementById("filaMaquina").cells.length) + " fichas";
-  setTimeout(aviso, 1000);
+  setTimeout(aviso, 200);
   function aviso() {
     alert("COMPUTADOR: jugada concluída: " + mensaje + " - Cambio a TURNO JUGADOR");
     mensaje ="";
@@ -943,13 +985,13 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado, fichaDeL
 
 /*********************************************************************************** */
   function sugerirJugada() {
-    var bs = buscarSeries(true);
-    var ns = (bs.split("-")[0] == "S")? bs.split("-")[1]:0;
     var be = buscarEscaleras(true);
     var ne = (be.split("-")[0] == "E")? be.split("-")[1]:0;
-    
-    if (ne > ns) buscarEscaleras(true);
-    else buscarSeries(true);
+    var bs = buscarSeries(true);
+    var ns = (bs.split("-")[0] == "S")? bs.split("-")[1]:0;
+
+    if (ns > ne) buscarSeries(true);
+    else buscarEscaleras(true);
 
     if ((ne == 0) && (ns == 0)) {
       if (!ampliarEscalera(true)) 
@@ -971,19 +1013,27 @@ function jugadaComp() {
     var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
     var be = buscarEscaleras(false);
     var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
-    if (ne > ns) {
-      buscarEscaleras(false);
-      mensaje = mensaje + " - escalera de " + ne + " fichas";
-    } else if (ne!= 0 || ns !=0) {
+    // if (ne > ns) {
+    //   buscarEscaleras(false);
+    //   mensaje = mensaje + " - escalera de " + ne + " fichas";
+    // } else if (ne!= 0 || ns !=0) {
+    //   buscarSeries(false);
+    //   mensaje = mensaje + " - serie de " + ns + " fichas";
+    // }
+    // if (ne == 0 && ns == 0) {
+    if (ns > ne) {
       buscarSeries(false);
       mensaje = mensaje + " - serie de " + ns + " fichas";
+    } else if (ne > 0) {  // ns <= ne, luego ns != 0 ==> ne != 0 
+      buscarEscaleras(false);
+      mensaje = mensaje + " - escalera de " + ne + " fichas";
     }
     if (ne == 0 && ns == 0) {
-      console.log("no Ser y Esc");
+      console.log("no Serie ni Escalera");
       if (!ampliarEscalera(false)) {
-        console.log("no AmEsc");
+        console.log("no AmpliaEsc");
         if (!ampliarSerie(false))  {
-          console.log("no AmSer");
+          console.log("no AmpliaSer");
           if (!buscarCortes(false)) {
             console.log("no Cortes");
             textoJ.innerHTML = "COMPUTADOR:<br>" + "Jugadas computador: pulse CAMBIO para pasar el turno al jugador";
@@ -1011,7 +1061,7 @@ function  buscaMarca() {
 }
 
 //************************************************************************** */
-// Busca en los grupos de la mesa que lo permiten puntos de corte para jugar
+// Busca en los grupos de la mesa que permiten puntos de corte para jugar
 function buscarCortes(jugador) {
   var tablaMesa = document.getElementById("tablaMesa");
   var EMesa = [...tablaMesa.rows].filter(el => el.id.startsWith("E"));
@@ -1027,12 +1077,12 @@ function buscarCortes(jugador) {
   // filaJugador = document.getElementById("filaJugador");
   if (jugador) arrJ = filaFichasAArrayCodigos(filaJugador);
   else arrJ = filaFichasAArrayCodigos(filaMaquina);
-  filaMaquina = document.getElementById("filaMaquina");
+  //filaMaquina = document.getElementById("filaMaquina");
 
   EMesa = EMesa.filter(el => !el.id.startsWith("E-3"));
   var arrJ;
   ordenar(arrJ);
-  for (let i = 0; i < arrJ.length; i++) {
+  for (let i = 0; i < arrJ.length; i++) {  
     for (var ff = 0; ff < EMesa.length; ff++) {
       var arrGM =filaFichasAArrayCodigos(EMesa[ff]);
 
@@ -1101,7 +1151,7 @@ function buscarCortes(jugador) {
           ficha1.classList.add('marcada');  //marcado visual
           ficha1.setAttribute("gType", 'C');
           ficha1.setAttribute("numGrupo", numGrupo); // id único de grupo
-          ficha1.setAttribute("grupoMesa", EMesa[ff].id); // amplía un corte en la fila der la mesa
+          ficha1.setAttribute("grupoMesa", EMesa[ff].id); // amplía un corte en la fila de la mesa
           ficha1.setAttribute("lado", (cortesI?'izda':'dcha'));
           ficha1.setAttribute("cortes", cortesI?cortesI:cortesD);
           if (cortesD == 1 || cortesI == 1){
@@ -1334,7 +1384,40 @@ function obtenerCodigo(arr) {
   return codigo; 
 }
 
-//************************************************************************** */
+
+//**************************************************************************
+// Obtiene el vector de codigos "xColor" de una fila de la mesa
+// a partir de su código de grupo. Ej: E-5-3-1 --> (103,104,105,106,107)
+// los elementos están ordenados
+function obtenerVector(codigo) {
+  var vector = [];
+  var co = codigo.split('-');
+  if (co[0] == 'E') {
+    vector[0] = parseInt(co[3]) * 100 + parseInt(co[2]);
+    if (co[1] >= 3) {
+      for (let i=1; i < co[1]; i++) {
+        vector[i] = vector[i-1] + 1
+      }
+    }
+  }
+  if (co[0] == 'S') {
+    if (co[1] == '4') {
+      vector[0] = parseInt(co[2]); 
+      vector[1] = parseInt(vector[0]) + 100; 
+      vector[2] = parseInt(vector[0]) + 200; 
+      vector[3] = parseInt(vector[0]) + 300;
+    } else if (co[1] == '3') {//serie de 3
+      for (let i=0, j=0; i < 4; i++) {
+        if (i != co[3]) {
+          vector[j++] = parseInt(co[2]) + i * 100;
+        }
+      }
+    }
+  } 
+  return vector;
+}
+
+//**************************************************************************
 // Genera una traza de los cambios en la mesa y los imprime en la consola
 function trazaMesa() {
   var tablaMesa = document.getElementById("tablaMesa");
@@ -1347,7 +1430,7 @@ function trazaMesa() {
 
 //******************************************************************************/
 // convierte una fila de fichas (fila de una tabla HTML) en un array de enteros
-// codificada xcolor
+// codificada "xColor"
 
 function filaFichasAArrayCodigos(fila) {
   return [...fila.cells].map(el => el.id.substr(1));
@@ -1481,6 +1564,9 @@ function ordenarFila(arr, fila) {
   
 
 //*****************************************************************************
+//***********  Hace una copia de seguridad de las filas de la mesa         ****
+//***********  y la del jugador para poder deshacer los arrastres erróneo  ****
+//*****************************************************************************
 function copiarTabla() {
  
  
@@ -1488,9 +1574,14 @@ function copiarTabla() {
     var tablaMesa = document.getElementById('tablaMesa');
 
     numrows = tablaDest.rows.length;
+
+    // borrar la tabla
     for (let i = 0; i < numrows; i++) {
       tablaDest.deleteRow(0);
     }
+
+    // copiar la tabla de la mesa
+
     for (let i = 0; i < tablaMesa.rows.length; i++) {
       var row = tablaDest.insertRow(-1);
       row.id = tablaMesa.rows[i].id;
