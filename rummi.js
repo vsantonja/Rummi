@@ -1,4 +1,17 @@
+/*****************************************************************************/
+/*****************************************************************************/
+/********* Programa para jugar al Rummi.                               *******/
+/********* Un jugador de carne y hueso contra el computador            *******/
+/********* Version 0.1 Incompleta. Tiene muchas fallos y lagunas       *******/
+/********* Por ejemplo: maneja mal o no maneja los _comodines_         *******/
+/********* Programado por V. Santonja                                  *******/
+/*****************************************************************************/
+/*****************************************************************************/
+
+
 const arrayColores = ["black", "red", "blue", "green"];
+const juegosFichas = 2;
+const comodines = 0;
 var filaMesa;
 var arrayMesa;
 var fm; 
@@ -11,17 +24,15 @@ var modoCancelable = false;
 var eventoHecho = false;
 
 /*****************************************************************************/
-/*****************************************************************************/
 /**************************                        ***************************/
 /************************** PROGRAMACIÓN DE LA IU  ***************************/
 /**************************                        ***************************/
-/*****************************************************************************/
 /*****************************************************************************/
 
 function dragStart(ev) { 
   eventoHecho = false;
   ev.dataTransfer.setData("text", ev.target.id);
-  if (!modoCancelable) {
+  if (!modoCancelable) {  // guardamos el estado de la mesa y fila deljugador para poder reconstruirlas
     modoCancelable = true;
     numFichasJ0 = filaJugador.cells.length;
     copiarTabla();
@@ -35,10 +46,10 @@ function dragStart(ev) {
     document.getElementById("botonAmpS").style.display = "none";
     document.getElementById("botonAmpE").style.display = "none";        
     document.getElementById("buscarCortes").style.display = "none" ;
-    textoJ.innerHTML = "JUGADOR: operació cancelable. Al terminar con el movimiento de fichas debe Aceptar o Cancelar";
+    textoJ.innerHTML = "JUGADOR: operación cancelable. Al terminar con el movimiento de fichas debe Aceptar o Cancelar";
     if (traza) console.log("Inicio arrrastre de ficha" + ev.target.id);
   }
-  fm=ev.target; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer-getData() solo se puede conocer en el "drop"
+  fm=ev.target; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer.getData() solo se puede conocer en el "drop"
 }
 
 
@@ -127,12 +138,13 @@ function hazNoDropable(ficha) {
 
 
 //*****************************************************************************
-function validaSim(arr) {
+// devuelve NADA si arr está bien formado o -1 si no
+function validaSim(arr) { 
   var len = arr.length;
-  if (len >= 3 && !esSerie(arr) && !esEscalera(arr)) {  
+  if (len >= 3 && !esSerie(arr) && !esEscalera(arr)) {   // las filas de tres en la mesa deben ser escalera o series
      return -1;
   }
-  if (len == 2) {
+  if (len == 2) { // si hay dos en la fila es que se está montando la esc o la serie, Hay que ser más permisivo
     if ((arr[0] % 100) == (arr[1] % 100)) {  // 2 fichas del mismo número
       if (arr[0] == arr[1]) {return -1;}     // si son duplicados no valen para serie ni para escaleras
     }
@@ -187,22 +199,23 @@ function removeStyle(ev) {
 }
 
 
- 
+//******************************************************************************
+// Selecciona valor del Comodín
 function defineJoker(){
-  textoJ.innerHTML = "Selecciona valor del Comodín";
-  // document.getElementById("btnValor").onclick;
+  textoJ.innerHTML = "Fija el valor del Comodín";
   document.getElementById("fvalores").style.display = "inline";
   document.removeEventListener(click);
 }
 
 //******************************************************************************
- /* When the user clicks on the button,
- toggle between hiding and showing the dropdown content */
+/* Cuando el usuario hace click en el botón,
+  csambia entre mostrar y ocultar el contenido desplegable */
 function choseValor() {
    for (var i=0;i<document.fvalores.valores.length;i++){ 
      if (document.fvalores.valores[i].checked) break; 
     } 
-    var comodin=(document.getElementById("F415")) ? document.getElementById("F415"): document.getElementById("F416");
+    var comodin=(document.getElementById("F415")) ? document.getElementById("F415")
+                                                  : document.getElementById("F416");
     comodin.innerHTML= document.fvalores.valores[i].value;
     document.getElementById("fvalores").style.display = "none";
     document.getElementById("fcolores").style.display = "inline";
@@ -215,7 +228,8 @@ function choseColor(){
   for (var i=0;i<document.fcolores.colores.length;i++){ 
     if (document.fcolores.colores[i].checked) break; 
   } 
-  var comodin=(document.getElementById("F415")) ? document.getElementById("F415"): document.getElementById("F416");
+  var comodin=(document.getElementById("F415")) ? document.getElementById("F415")
+                                                : document.getElementById("F416");
   comodin.style.color= arrayColores[document.fcolores.colores[i].value];
   comodin.id="F" + ((document.fcolores.colores[i].value)*100 + parseInt(comodin.innerHTML));
   document.getElementById("fcolores").style.display = "none";
@@ -254,24 +268,27 @@ var sacoVisible = true;
   location.reload();
 }
 
-function inicio() {iniciar(0);}
-
+function inicio() {
+  alert( "Rumiant versió 0.1- V. Santonja (20/3/2021). Programa  que permite que un jugador de carne y hueso compita al Rummikub contra el computador. ATCHUNG!: No maneja los _comodines_");
+  iniciar(0);
+}
 
 function iniciar(prueba) {
-  textoJ = document.getElementById("textoJugador");
-  //var arraySaco = [];
   var ficha;
+  textoJ = document.getElementById("textoJugador"); 
   tablaSaco = document.getElementById("tablaSaco");
-  if (prueba == 0) {
-    for (let a = 1, i=0; a < 3; a++) {   // hay 2 juegos de cada
+  if (prueba == 0) {   // 0 reparto normal, 1 carga de prueba 1
+    for (let a = 1, i = 0; a <= juegosFichas; a++) {   // HAY 1 O 2 JUEGOS DE FICHAS
       for (let v = 1; v < 14; v++) {     // 13 valores del 1 al 13
         for (let c = 0; c < 4; c++) {    // y 4 colores del 0 al 3
-          arraySaco[i] = c * 100 + v;    // Codif. por color. Ejemplo la ficha 108 es de color 1 y valor 8
+          arraySaco[i] = codigoColor(c,v);  // Codif. por color. Ejemplo la ficha 108 es de color c=1 y valor v=8
           i++;
         }
       } 
     }
-    arraySaco[104] = 415; arraySaco[105] = 416;  // los dos comodines
+    if (comodines == 1) arraySaco[52*juegosFichas] = 415;  // codigoColor de los dos _comodines_
+    if (comodines == 2) arraySaco[52*juegosFichas+1] = 416;
+    // baraja
     arraySaco.sort((a, b) => 0.5 - Math.random());
         // The Fisher Yates Method
         // if (tipus == 0) {
@@ -281,24 +298,23 @@ function iniciar(prueba) {
         //       arraySaco[i] = arraySaco[j]
         //       arraySaco[j] = k
         //     }
-  } else {
-    arraySaco = [101, 108,  10, 203, 202, 201, 207,
+  } else {   //usamos una carga aftificial
+    arraySaco = [101, 108,  10, 203, 202, 201, 207,                             // se quedan en el saco
           103, 303, 106, 306, 007, 203,   6, 206, 204, 107, 205, 206, 13, 212,  // 14 fichas al jugador
           103, 106, 302, 110, 105, 103, 112,   5, 203, 303, 107, 213, 308,  9]; // 14 fichas al computador
-          arrayMesa =[
-            [110, 210, 310],           // una serie de 3 dieces
-            [1, 2, 3, 4, 5, 6, 7, 8],  // una esc de negros
-            [203, 204, 205]          // escalera azul
-            
-          ]  
+    arrayMesa =[
+          [110, 210, 310],           // una serie de 3 dieces
+          [1, 2, 3, 4, 5, 6, 7, 8],  // una esc de negros
+          [203, 204, 205]            // escalera azul      
+    ]  
   } 
   //conversión de números a fichas
-  for (let c = 0, i=0; c < 8; c++) {// 8 filas
+  for (let row = 0, i=0; row < 8; row++) { // 8 filas
     if (i == arraySaco.length) break;
     filaSaco = this.document.createElement("tr");
     tablaSaco.appendChild(filaSaco);
-    for (let f = 0; f < 13; f++) {
-      // 13 filas 8*13 = 104 fichas
+    for (let col = 0; col < 14; col++) {  // como max hay 106 fichas (52*2 +2). con 14 filas caben 14*8=112 fichas 
+      // 8 Filas y 13 columnas son 8*13 = 104 fichas
       if (i == arraySaco.length) break;
       ficha = document.createElement("td");
       ficha.className = "figuraFicha";
@@ -380,7 +396,7 @@ function seleccionarGrupo() {
   var codGrupo; // Código del grupo
   var colorEsc; // la Escalera es monocolor, luego esto es un entero de 0 a 3
   var colorSer; // la serie de 3 le falta un color (de 0 a 3), a la de 4 ninguno (-1)
-  var valorIni = -1; //valor inicial de la escalera
+  var valorIni = -1; //valor inicial de la escalera. Ejemplo: esc 3-4-5-6 --> 3
   var tam = 0; // tamaño del grupo
   var groupType = this.getAttribute ("gType"); // Tipo = 'S'|'E'|'s'|'e'|'A'|'C'
   var numGrupo =  this.getAttribute ("numGrupo");
@@ -450,8 +466,8 @@ function seleccionarGrupo() {
     }
   }
 }
-if (filaMesaDest) marcarFilaMesa(filaMesaDest,true);
-if (filaMesa) marcarFilaMesa(filaMesa, true);
+  if (filaMesaDest) marcarFilaMesa(filaMesaDest,true);
+  if (filaMesa) marcarFilaMesa(filaMesa, true);
   if (traza) trazaMesa();
 }
 
@@ -467,8 +483,8 @@ function buscarSeries(jugador) {
   
   var tamSer = [];
   var fichasPost = [];
-  var series = []; // series de 3 o 4 fichas
-  var s2 = []; // proto series de 2 fichas
+  var series = []; // series auténticas de 3 o 4 fichas
+  var s2 = [];     // proto series de 2 fichas
   var nuevaserie = [];
   var ret = "0";
 
@@ -904,10 +920,14 @@ function ampliarEscalera(jugador){
   if (traza) console.log(num_traza++ + " Busco AmE");
   var fichasJugador = filaJugador.cells;
   var fichasMaquina = filaMaquina.cells;
-  limpiaFila(filaJugador);
-  hazDraggable(filaJugador);
-  limpiaFila(filaMaquina);
-  if (jugador) fichas = fichasJugador; else fichas = fichasMaquina;
+  if (jugador) {
+    limpiaFila(filaJugador);
+    hazDraggable(filaJugador);
+    fichas = fichasJugador; 
+  } else {
+    limpiaFila(filaMaquina);
+    fichas = fichasMaquina;
+  }
   var hayAmpliacionEsc = false;
   var tablaMesa = document.getElementById("tablaMesa");
   var e3Mesa = [...tablaMesa.rows].filter(el => el.id.startsWith("E")); // si empiezan por E son escaleras >= 3
@@ -1013,14 +1033,7 @@ function jugadaComp() {
     var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
     var be = buscarEscaleras(false);
     var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
-    // if (ne > ns) {
-    //   buscarEscaleras(false);
-    //   mensaje = mensaje + " - escalera de " + ne + " fichas";
-    // } else if (ne!= 0 || ns !=0) {
-    //   buscarSeries(false);
-    //   mensaje = mensaje + " - serie de " + ns + " fichas";
-    // }
-    // if (ne == 0 && ns == 0) {
+   
     if (ns > ne) {
       buscarSeries(false);
       mensaje = mensaje + " - serie de " + ns + " fichas";
@@ -1570,12 +1583,12 @@ function ordenarFila(arr, fila) {
 function copiarTabla() {
  
  
-    var tablaDest = document.getElementById('tablaDest');
-    var tablaMesa = document.getElementById('tablaMesa');
+    var tablaDest = document.getElementById('tablaDest');  // donde se hace la copia
+    var tablaMesa = document.getElementById('tablaMesa');  // tabla a copiar
 
     numrows = tablaDest.rows.length;
 
-    // borrar la tabla
+    // borrar la tabla con la copia anterior
     for (let i = 0; i < numrows; i++) {
       tablaDest.deleteRow(0);
     }
@@ -1727,6 +1740,10 @@ function ordenarValorOColor(){
 
 
 function avisoComodin(){
-  textoJ.innerHTML = "Comodin. Antes de arrastarla debe asignarle un valor y color concreto. Haga doble click sobre la ficha"
+  textoJ.innerHTML = "COMODIN. Antes de arrastarla debe asignarle un valor y color concreto. Haga doble click sobre la ficha"
+}
 
+function codigoColor(c,v) {
+
+  return c * 100 + v;
 }
