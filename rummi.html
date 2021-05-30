@@ -18,6 +18,8 @@
             <button type="button" class="btn btn-naranja center-varios" onclick="cancelarJugada()" id = "cancelarJugada"  style="display: none">Cancelar</button>
             <button type="button" class="btn btn-verde  center-varios" onclick="aceptarJugada()"  id = "aceptarJugada"   style="display: none">Aceptar</button>
             <button type="button" class="btn center-varios" onclick="ordenarValorOColor()"   id = "ordenarValorOColor" >Ord. x valor</button>
+            <button type="button" class="btn btn-naranja center-varios" onclick="modoAutomatico()"   id="CompComp" >Computador</button><br>
+            </div>
         </div>
         <div id="textoJugador"> Pulse repartir </div>
       
@@ -25,7 +27,8 @@
 
 
     <div id=cuerpo> 
-        <h4>  Jugador </h4>
+        <h4 id="cabecera1">  1. Jugador </h4> 
+        
         <table style="display: none" id="tablaDest">   </table>
         <div id="botonesjugadas">
            
@@ -97,7 +100,7 @@
             </div>
 
 
-                <h4> Computador </h4>
+                <h4 id="cabecera2"> 2. Computador </h4>
 
                 <div id="zonaComp" >   
                     <button type="button" class="btn center-varios" style="display: none"  onclick="mostrarManoComutador()"  id ="MMC"> Ver 0 fichas</button>

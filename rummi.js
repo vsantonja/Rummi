@@ -12,6 +12,8 @@
 const arrayColores = ["black", "red", "blue", "green"];
 const juegosFichas = 2;
 const comodines = 0;
+var humano = true;  // por defecto el jugador 1 es humano
+var contadorJugadas = 0;
 var filaMesa;
 var arrayMesa;
 var fm; 
@@ -491,8 +493,10 @@ function buscarSeries(jugador) {
   var fichasJugador = [...filaJugador.cells];
   var fichasMaquina = [...filaMaquina.cells];
   // primero, hacemos limpieza
-  limpiaFila(filaJugador);
-  hazDraggable(filaJugador);
+  if (jugador) {
+    limpiaFila(filaJugador);
+    hazDraggable(filaJugador);
+  }
   limpiaFila(filaMaquina);
   misFichas = fichasJugador.map(el => el.id.substr(1));
   maqFichas = fichasMaquina.map(el => el.id.substr(1));
@@ -816,32 +820,12 @@ function buscarEscaleras(jugador) {
 
 /* ****************************************************************************** */
 function robarFicha(jugador) {
-
-  //  var gruposMesa = [...document.getElementById("tablaMesa").rows];
-  //  var grupo =[];
-  //   if (jugador) {
-  //     // si hay grupos de 1 o de 2 los elimina y devuelve la fichas a la mano del jugador
-  //     const longRows = gruposMesa.length;
-  //     for (let i = longRows - 1; i > 0 ; i--) { //recuerda que i=0 es rummy
-  //       if (gruposMesa[i].cells.length < 3) {
-  //        grupo[i] = gruposMesa[i].cells;
-  //        const longCells =  grupo[i].length;
-  //         for (let j=0; j < longCells; j++) {
-  //           grupo[i][0].id = 'F' + grupo[i][0].id.substr(1); 
-  //          filaJugador.appendChild(grupo[i][0]); 
-  //         }
-  //         document.getElementById("tablaMesa").deleteRow(-1);
-  //       }
-  //     }
-  //     limpiaFila(filaJugador);
-   // ************************* si no ha jugado ficha ===>   fichaJugada = false
-   // }
-
-  if (!fichaJugada) { // no se jugado ninguna ficha de la mano. Por tanto ates de cambiar de turno hay que robar 
+  if (!fichaJugada) { // no se ha jugado ninguna ficha de la mano. 
+                      // Por tanto antes de cambiar de turno hay que robar 
     if (fichasSaco.length > 0) {
-     var ficha = fichasSaco.pop();
-     if (jugador) ficha.id = 'F' + ficha.id.substr(1);  else ficha.id = 'C' + ficha.id.substr(1);
-      if (traza) console.log("robo ficha " + ficha.id);
+      var ficha = fichasSaco.pop();
+      if (jugador) {ficha.id = 'F' + ficha.id.substr(1);} else {ficha.id = 'C' + ficha.id.substr(1);}
+      if (traza) {console.log("robo ficha " + ficha.id);}
       if (jugador) {
         ficha.draggable = "true";
         ficha.setAttribute("ondragstart", "dragStart(event)");
@@ -850,29 +834,30 @@ function robarFicha(jugador) {
         filaMaquina.appendChild(ficha);
      }
     } else {alert ("El saco está vacío");}
-} else { //empieza una nueva jugada 
-  fichaJugada = false;
-  document.getElementById("Cambio").innerHTML="Robar ficha";
-  document.getElementById("Cambio").classList.remove("btn-primarry");
-  document.getElementById("Cambio").classList.add("btn-danger");
-}
-
-if (jugador) {
-  if (traza) console.log("************* Turno COMPUTADOR **************");
-  jugadaComp();
- // document.getElementById("Sugerir").style.display="none"; 
-  robarFicha(false);
-  document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substring(0,8) + (document.getElementById("filaMaquina").cells.length) + " fichas";
-  setTimeout(aviso, 1000);
-  function aviso() {
-    alert("COMPUTADOR: jugada concluída: " + mensaje + " - Cambio a TURNO JUGADOR");
-    mensaje ="";
+  } else { //empieza una nueva jugada sin robar
+    fichaJugada = false;
+    document.getElementById("Cambio").innerHTML="Robar ficha";
+    document.getElementById("Cambio").classList.remove("btn-primarry");
+    document.getElementById("Cambio").classList.add("btn-danger");
   }
-} else {
-  if (traza) console.log("************** Turno JUGADOR ****************");
-  textoJ.innerHTML = "JUGADOR: arrastre fichas del jugador, de la mesa o pida sugerencia";
-  document.getElementById("Jugada").style.display="inline"; 
-}
+  // si es juego en modo automático (o comp-comp) no se ejecuta
+  if (jugador && humano) {
+   // jugador = false;
+    if (traza) console.log("jug. "+ contadorJugadas +" ************* 2. COMPUTADOR **************");
+    jugadaComp(false);
+  // document.getElementById("Sugerir").style.display="none"; 
+    // robarFicha(false);
+    document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substring(0,8) + (document.getElementById("filaMaquina").cells.length) + " fichas";
+    setTimeout(aviso, 1000);
+    function aviso() {
+      alert("COMPUTADOR: jugada concluída: " + mensaje + " - Cambio a TURNO JUGADOR");
+      mensaje ="";
+    }
+  } else if (!jugador && humano) {
+    if (traza) console.log("************** 1. JUGADOR ****************");
+    textoJ.innerHTML = "JUGADOR: arrastre fichas del jugador, de la mesa o pida sugerencia";
+    document.getElementById("Jugada").style.display="inline"; 
+  }
 }
 
 /******************************************************************************/
@@ -1024,51 +1009,71 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado, fichaDeL
     
 
 /*********************************************************************************** */
-/*********   El computador calcula su jugada *************************************** */
+/*********   El computador o juggador automatico calcula su jugada *************************************** */
 /*********************************************************************************** */
 var mensaje = "";
-function jugadaComp() {
+var vencedor = false;
+var unavez;
+function jugadaComp(jugador) {
+  unavez = false;
+  while(!vencedor && !unavez){
+    if (traza && jugador)  console.log("jug. " + contadorJugadas + " ************* 1. JUGADOR **************");
+    if (traza && !jugador) console.log("jug. " + contadorJugadas + " ************* 2. COMPUTADOR ***********");
+    if (humano && !jugador) unavez=true;
+    
     for (let stop = 8; stop; stop--) { // 8 es una salvaguarda para que no se hagan inf iteraciones
-    var bs = buscarSeries(false);
-    var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
-    var be = buscarEscaleras(false);
-    var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
-   
-    if (ns > ne) {
-      buscarSeries(false);
-      mensaje = mensaje + " - serie de " + ns + " fichas";
-    } else if (ne > 0) {  // ns <= ne, luego ns != 0 ==> ne != 0 
-      buscarEscaleras(false);
-      mensaje = mensaje + " - escalera de " + ne + " fichas";
+      var bs = buscarSeries(jugador);
+      var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
+      var be = buscarEscaleras(jugador);
+      var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
+    
+      if (ns > ne) {
+        buscarSeries(jugador);
+        mensaje = mensaje + " - serie de " + ns + " fichas";
+        console.log("Serie " + ns + " fichas");
+      } else if (ne > 0) {  // ns <= ne, luego ns != 0 ==> ne != 0 
+        buscarEscaleras(jugador);
+        mensaje = mensaje + " - escalera de " + ne + " fichas";
+        console.log("Escalera " + ne + " fichas");
+      }
+      if (ne == 0 && ns == 0) {
+        console.log("no Serie ni Escalera");
+        if (!ampliarEscalera(jugador)) {
+          console.log("no AmpliaEsc");
+          if (!ampliarSerie(jugador))  {
+            console.log("no AmpliaSer");
+            if (!buscarCortes(jugador)) {
+              console.log("no Cortes");
+              textoJ.innerHTML = jugador?"JUGADOR":"COMPUTADOR:" 
+              textoJ.innerHTML += " pulse CAMBIO para pasar el turno al ";
+              textoJ.innerHTML += jugador?"computador":"jugador";
+              break;
+            } else mensaje  = mensaje + " - corte";
+          } else mensaje = mensaje + "- amplío serie";
+        } else mensaje = mensaje + " - amplío escalera";
+      }
+      //console.log(mensaje);
+      contadorJugadas++;
+      seleccionarGrupo.call(buscaMarca(jugador));
+    } //del for
+     robarFicha(jugador);
+    jugador = !jugador;
+    if (contadorJugadas == 100) {
+      vencedor=true;
+      console.log("No hay vencedor. ¡100 jugadas!");
+    };
+    if (proclamarGanador() == 1 || proclamarGanador() == 2) {
+      vencedor=true;
+      console.log("The END");
     }
-    if (ne == 0 && ns == 0) {
-      console.log("no Serie ni Escalera");
-      if (!ampliarEscalera(false)) {
-        console.log("no AmpliaEsc");
-        if (!ampliarSerie(false))  {
-          console.log("no AmpliaSer");
-          if (!buscarCortes(false)) {
-            console.log("no Cortes");
-            textoJ.innerHTML = "COMPUTADOR:<br>" + "Jugadas computador: pulse CAMBIO para pasar el turno al jugador";
-           return;
-          } else mensaje  = mensaje + " - corte";
-        } else mensaje = mensaje + "- amplío serie";
-      } else mensaje = mensaje + " - amplío escalera";
-    }
-    directo = false;
-    //alert("jugada encontrada");
-    seleccionarGrupo.call(buscaMarca());
-    // retrasaSeleccion();
-    // function retrasaSeleccion() {setTimeout(hazClick,1000);}
-    // function hazClick(){seleccionarGrupo.call(buscaMarca())}
-  } // for
+} // del while
 
 }
 
 
 //*************************************************************************** */
-function  buscaMarca() {
-  var fichas = [...filaMaquina.cells];
+function  buscaMarca(jugador) {
+  var fichas = jugador?[...filaJugador.cells]:[...filaMaquina.cells];
   var fichaMarcada = fichas.find(f => f.className == 'figuraFicha marcada');
   return fichaMarcada;
 }
@@ -1715,10 +1720,19 @@ function verBotonesJugadas() {
 
 
 /******************************************************************************/
-function proclamarGanador(jugador) {
-
-  alert("El ganador es: el" + (jugador?" JUGADOR":" COMPUTADOR") + ". Terminó el juego");
-
+function proclamarGanador() {
+  var fichasJugador = [...filaJugador.cells];
+  var fichasMaquina = [...filaMaquina.cells];
+  if (fichasJugador.length == 0 ) {
+    console.log("El ganador es el JUGADOR. Terminó el juego");
+    alert("El ganador es el JUGADOR. Terminó el juego");
+    return(1);
+  }
+  if ( fichasMaquina.length == 0) {
+    console.log("El ganador es el COMPUTADOR. Terminó el juego");
+    alert("El ganador es el COMPUTADOR. Terminó el juego");
+    rewturn(2);
+  }
 }
 
 var ordenXColor = true;
@@ -1746,4 +1760,12 @@ function avisoComodin(){
 function codigoColor(c,v) {
 
   return c * 100 + v;
+}
+//modo automático
+function modoAutomatico() {
+  humano = false;
+  document.getElementById("CompComp").style.display = "none";
+  document.getElementById("cabecera1").innerHTML = "1. Jugador (modo AUTOMÁTICO)";
+  mostrarManoComutador();
+  jugadaComp(true);
 }
