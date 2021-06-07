@@ -15,14 +15,12 @@
             <button type="button" class="btn center-varios" onclick="iniciar(0)"       id = "botonRepartir">Repartir</button>
             <button type="button" class="btn center-varios" onclick="robarFicha(true)" id ="Cambio"> Robar ficha</button> 
             <!-- <button type="button" class="btn center-varios" onclick="iniciar(1)" id = "botonRepartir1">x</button> -->
-            <button type="button" class="btn btn-naranja center-varios" onclick="cancelarJugada()" id = "cancelarJugada"  style="display: none">Cancelar</button>
-            <button type="button" class="btn btn-verde  center-varios" onclick="aceptarJugada()"  id = "aceptarJugada"   style="display: none">Aceptar</button>
-            <button type="button" class="btn center-varios" onclick="ordenarValorOColor()"   id = "ordenarValorOColor" >Ord. x valor</button>
-            <button type="button" class="btn btn-naranja center-varios" onclick="modoAutomatico()"   id="CompComp" >Computador</button><br>
-            </div>
+            <button type="button" class="btn btn-naranja center-varios" onclick="cancelarJugada()"  id = "cancelarJugada"  style="display: none">Cancelar</button>
+            <button type="button" class="btn btn-verde  center-varios" onclick="aceptarJugada()"    id = "aceptarJugada"   style="display: none">Aceptar</button>
+            <button type="button" class="btn center-varios" onclick="ordenarValorOColor()"          id = "ordenarValorOColor" >Ord. x valor</button>
+            <button type="button" class="btn btn-naranja center-varios" onclick="modoAutomatico()"  id = "CompComp" >Automático</button>
         </div>
-        <div id="textoJugador"> Pulse repartir </div>
-      
+        <div id="textoJugador"> ¡Hola! </div>  
     </div>
 
 
@@ -96,19 +94,16 @@
                     </tr>    
                 </table>        
             </div> 
-            
-            </div>
-
-
-                <h4 id="cabecera2"> 2. Computador </h4>
-
-                <div id="zonaComp" >   
+        </div> 
+             <h4> 2. Computador </h4>
+            <div id="zonaComputador" > 
+                <div id="BotonComp" >   
                     <button type="button" class="btn center-varios" style="display: none"  onclick="mostrarManoComutador()"  id ="MMC"> Ver 0 fichas</button>
                     <table style="display: none" id="tablaMaquina">   
                         <tr id="filaMaquina"></tr>       
                     </table>
                 </div>
-
+                <div id="textoComp" > <em>Computador</em>: en espera </div>
             </div>
         </div>
     </div>

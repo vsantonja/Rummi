@@ -12,8 +12,7 @@
 const arrayColores = ["black", "red", "blue", "green"];
 const juegosFichas = 2;
 const comodines = 0;
-var humano = true;  // por defecto el jugador 1 es humano
-var contadorJugadas = 0;
+var contadorJugadas = 1;
 var filaMesa;
 var arrayMesa;
 var fm; 
@@ -278,6 +277,8 @@ function inicio() {
 function iniciar(prueba) {
   var ficha;
   textoJ = document.getElementById("textoJugador"); 
+  textoC = document.getElementById("textoComp"); 
+
   tablaSaco = document.getElementById("tablaSaco");
   if (prueba == 0) {   // 0 reparto normal, 1 carga de prueba 1
     for (let a = 1, i = 0; a <= juegosFichas; a++) {   // HAY 1 O 2 JUEGOS DE FICHAS
@@ -301,13 +302,13 @@ function iniciar(prueba) {
         //       arraySaco[j] = k
         //     }
   } else {   //usamos una carga aftificial
-    arraySaco = [101, 108,  10, 203, 202, 201, 207,                             // se quedan en el saco
-          103, 303, 106, 306, 007, 203,   6, 206, 204, 107, 205, 206, 13, 212,  // 14 fichas al jugador
-          103, 106, 302, 110, 105, 103, 112,   5, 203, 303, 107, 213, 308,  9]; // 14 fichas al computador
+    arraySaco = [101, 108,  10, 208, 202, 201, 207,                             // se quedan en el saco
+          3, 203, 111, 306, 001, 207,   6, 206, 211, 107, 205, 209, 13, 212,  // 14 fichas al jugador
+          104, 106, 302, 110, 105, 109, 112,   5, 208, 312, 107, 213, 308,  9]; // 14 fichas al computador
     arrayMesa =[
-          [110, 210, 310],           // una serie de 3 dieces
-          [1, 2, 3, 4, 5, 6, 7, 8],  // una esc de negros
-          [203, 204, 205]            // escalera azul      
+          [3, 103, 203, 303],           // una serie de 3 dieces
+          [4, 5, 6, 7, 8],  // una esc de negros
+          [204, 205, 206]            // escalera azul      
     ]  
   } 
   //conversión de números a fichas
@@ -363,6 +364,13 @@ function iniciar(prueba) {
   textoJ.innerHTML = "JUGADOR: Arrastra fichas del jugador a la mesa o pide una sugererencia";
 //document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substr(8) + " 14 fichas";
   document.getElementById("MMC").innerHTML = "Ver       14 fichas";
+  document.onclick = function(ev) {
+    var btnAutomatico=document.getElementById("CompComp");              
+    if (!(ev.target.id == "CompComp")) { 
+      btnAutomatico.style.display="none";
+    }
+  };
+
 }
 
 
@@ -445,15 +453,18 @@ function seleccionarGrupo() {
     }
     if (groupType == 's'|| groupType == 'e')  {
       fichaMesa = [...document.getElementsByClassName('marcasuave')]; 
+      var f0 =fichaMesa[0].id;
       fichaMesa = fichaMesa.filter(el => el.getAttribute('numGrupo') == numGrupo );// solo PUEDE haber 1
       filaVella = fichaMesa[0].parentElement;
+      console.log("con marca suave "+ f0 + "    " + fichaMesa[0].id);
+
       if (fichaMesa[0].getAttribute('lado') == 'izda') {  // es 'e'
-      filaMesaDest.insertBefore(fichaMesa[0], filaMesaDest.firstChild);
-    } else {
-      filaMesaDest.appendChild(fichaMesa[0]);
+        filaMesaDest.insertBefore(fichaMesa[0], filaMesaDest.firstChild);
+      } else {
+        filaMesaDest.appendChild(fichaMesa[0]);
+      }
+      marcarFilaMesa(filaVella, true);
     }
-    marcarFilaMesa(filaVella, true);
-  }
   if (groupType == 'C')  {
     filaMesa =  document.getElementById(grupoMesa);
     fichasMesa2 =  [...filaMesa.cells];
@@ -470,13 +481,13 @@ function seleccionarGrupo() {
 }
   if (filaMesaDest) marcarFilaMesa(filaMesaDest,true);
   if (filaMesa) marcarFilaMesa(filaMesa, true);
-  if (traza) trazaMesa();
+  //if (traza) trazaMesa();
 }
 
 // ************************************************************************
 // esta función busca series cuyos componentes sean del mismo valor y distinto color
-function buscarSeries(jugador) {
-  if (traza) console.log(num_traza++ + " Busco Ser");
+function buscarSeries(jugador, tanteo) {
+  if (traza && !tanteo) console.log(num_traza++ + " Busco Ser");
 
   var grupoValor = [];
   var grupoValorSinDups = [];
@@ -502,7 +513,7 @@ function buscarSeries(jugador) {
   maqFichas = fichasMaquina.map(el => el.id.substr(1));
   // cambio la codif. dandole prioridad al valor
   var fichas = codifValor(jugador?misFichas:maqFichas);
-  ordenar(fichas);
+  ordenarArray(fichas);
   //separo las fichas en grupos del mismo valor "grupoValor[n]"
   var cuentaS3 = 0;
   var cuentaS2 = 0;
@@ -518,7 +529,7 @@ function buscarSeries(jugador) {
         cuentaDups++; // numero de dups en cada grupo de valor n
       }
     }
-    ordenar(grupoValor[n]); // ordeno los grupos para que los dups se vayan al final
+    ordenarArray(grupoValor[n]); // ordeno los grupos para que los dups se vayan al final
     // y reconstruyo el array fichas
     fichasPost = fichasPost.concat(grupoValor[n]);
     tamSer[n] = grupoValor[n].length - cuentaDups;
@@ -552,7 +563,8 @@ function buscarSeries(jugador) {
       var v =valorS2[num];
       if (v == s4Mesa[contS4].id.split('-')[2]) {
         for (var c=0; c < 4; c++) {
-          if ((s2[num].find(el => el == Number(c * 100 + v))) == undefined)  { //un color (de los 2 posibles) que me interesa
+          if ((s2[num].find(el => el == Number(c * 100 + v))) == undefined)  { 
+            //un color (de los 2 posibles) que me interesa
             nuevaserie[cont] = s2[num].slice();
             nuevaserie[cont].push(c * 100 + v); 
             cont++;            
@@ -564,9 +576,6 @@ function buscarSeries(jugador) {
       }
     }
   }
- 
-
-
   if (cont == 0) {
 //********************************************  NOU NOU NOU */
 // completar series de 2 fichas en la mano con una ficha de 
@@ -628,7 +637,6 @@ function buscarSeries(jugador) {
         }
       }
    }
-   //   var serIdxMax = series.map(el => el.length).findIndex(el => (el.length == serLenMax));
       marcarFichas("S", series[serIdxMax], jugador);
         textoJ.innerHTML = "JUGADOR: Haz doble click la serie marcada";
         ret = "S-" + serLenMax;
@@ -636,13 +644,15 @@ function buscarSeries(jugador) {
     for (let i =0; i < nuevaserie.length; i++) {
       var nuevoCodigoS3Mesa = "S-3-" + num + "-" + c;
       var lado;
-      marcarFichas("s", nuevaserie[i], jugador, nuevoCodigoS3Mesa, lado, s4Mesa[contS4-1].cells[c]);
+      var auxFichas = [...s4Mesa[contS4-1].cells].map(el => parseInt(el.id.substr(1)));
+      var indxc=auxFichas.indexOf(c*100+v);
+      marcarFichas("s", nuevaserie[i], jugador, nuevoCodigoS3Mesa, lado, s4Mesa[contS4-1].cells[indxc]);
       textoJ.innerHTML = "JUGADOR: Haz doble click sobre la(s) serie(s) marcada(s) y una ficha de la mesa";
     } 
     ret = "S-2";
   } else if (conte4omas >0)   {
     for (let i =0; i < nuevaserie.length; i++) {
-      var nuevoCodigoEMesa = "E-" + "  " + num + "-" + c;
+      var nuevoCodigoEMesa = "E-" + num + "-" + c;
       var lado;
       marcarFichas("s", nuevaserie[i], jugador, nuevoCodigoEMesa, lado, e4Mesa[contE4-1].cells[posic]);
       textoJ.innerHTML = "JUGADOR: Haz doble click sobre la(s) serie(s) marcada(s) y una ficha de la mesa";
@@ -656,8 +666,8 @@ function buscarSeries(jugador) {
 
 // ********************************************************************************************
 // Esta función busca escaleras cuyos compenentes sean del mismo color
-function buscarEscaleras(jugador) {
-  if (traza) console.log(num_traza++ + " Busco Esc");
+function buscarEscaleras(jugador, tanteo) {
+  if (traza  && !tanteo) console.log(num_traza++ + " Busco Esc");
   var du = [];
   var fichasPost = [];
   var escalera = [];
@@ -675,7 +685,7 @@ function buscarEscaleras(jugador) {
   misFichas = [...filaJugador.cells].map(el => parseInt(el.id.substr(1)));
   maqFichas = [...filaMaquina.cells].map(el => parseInt(el.id.substr(1)));
   if (jugador) fichas = misFichas; else fichas = maqFichas;
-  ordenar(fichas);
+  ordenarArray(fichas);
  
   // separo las fichas en grupos del mismo color c para buscar escaleras de color
    for (let c = 0; c <= 3; c++) {
@@ -690,7 +700,7 @@ function buscarEscaleras(jugador) {
       }
     }
     du[c] = cont;
-    ordenar(grupoColor[c]);   // los grupos de color c ya etaban ordenados
+    ordenarArray(grupoColor[c]);   // los grupos de color c ya etaban ordenados
                               // esto es para enviar los dups al final del grupo
 
     // voy recomponiendo el array fichas del jugador o el computador
@@ -817,49 +827,6 @@ function buscarEscaleras(jugador) {
   return ret;
 }
   
-
-/* ****************************************************************************** */
-function robarFicha(jugador) {
-  if (!fichaJugada) { // no se ha jugado ninguna ficha de la mano. 
-                      // Por tanto antes de cambiar de turno hay que robar 
-    if (fichasSaco.length > 0) {
-      var ficha = fichasSaco.pop();
-      if (jugador) {ficha.id = 'F' + ficha.id.substr(1);} else {ficha.id = 'C' + ficha.id.substr(1);}
-      if (traza) {console.log("robo ficha " + ficha.id);}
-      if (jugador) {
-        ficha.draggable = "true";
-        ficha.setAttribute("ondragstart", "dragStart(event)");
-        filaJugador.appendChild(ficha);
-      } else {
-        filaMaquina.appendChild(ficha);
-     }
-    } else {alert ("El saco está vacío");}
-  } else { //empieza una nueva jugada sin robar
-    fichaJugada = false;
-    document.getElementById("Cambio").innerHTML="Robar ficha";
-    document.getElementById("Cambio").classList.remove("btn-primarry");
-    document.getElementById("Cambio").classList.add("btn-danger");
-  }
-  // si es juego en modo automático (o comp-comp) no se ejecuta
-  if (jugador && humano) {
-   // jugador = false;
-    if (traza) console.log("jug. "+ contadorJugadas +" ************* 2. COMPUTADOR **************");
-    jugadaComp(false);
-  // document.getElementById("Sugerir").style.display="none"; 
-    // robarFicha(false);
-    document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substring(0,8) + (document.getElementById("filaMaquina").cells.length) + " fichas";
-    setTimeout(aviso, 1000);
-    function aviso() {
-      alert("COMPUTADOR: jugada concluída: " + mensaje + " - Cambio a TURNO JUGADOR");
-      mensaje ="";
-    }
-  } else if (!jugador && humano) {
-    if (traza) console.log("************** 1. JUGADOR ****************");
-    textoJ.innerHTML = "JUGADOR: arrastre fichas del jugador, de la mesa o pida sugerencia";
-    document.getElementById("Jugada").style.display="inline"; 
-  }
-}
-
 /******************************************************************************/
 
 function ampliarSerie(jugador){
@@ -981,96 +948,153 @@ function marcarFichas(groupType, group, jugador, codigoGrupoMesa, lado, fichaDeL
   if ((groupType == 's') || (groupType == 'e')) {
     // en este caso se ha pasado como parámetro la ficha de la mesa implicada
     fichaDeLaMesa.classList.add('marcasuave');  
+    console.log("la marcada suave es " + fichaDeLaMesa.id);
     fichaDeLaMesa.setAttribute("gType", groupType);
     fichaDeLaMesa.setAttribute("numGrupo", numGrupo);
   }
   numGrupo++;
 }
 
-
-/*********************************************************************************** */
-  function sugerirJugada() {
-    var be = buscarEscaleras(true);
-    var ne = (be.split("-")[0] == "E")? be.split("-")[1]:0;
-    var bs = buscarSeries(true);
-    var ns = (bs.split("-")[0] == "S")? bs.split("-")[1]:0;
-
-    if (ns > ne) buscarSeries(true);
-    else buscarEscaleras(true);
-
-    if ((ne == 0) && (ns == 0)) {
-      if (!ampliarEscalera(true)) 
-        if (!ampliarSerie(true))
-          if (!buscarCortes(true)) {
-            textoJ.innerHTML = "JUGADOR: No hay ninguna jugada con las fichas de tu mano"
-          }
+/* ****************************************************************************** */
+var sacoVacioAlerted=false;
+function robarFicha(jugador,auto) {
+  if (!fichaJugada) { // no se ha jugado ninguna ficha de la mano. 
+                      // Por tanto antes de cambiar de turno hay que robar 
+    if (fichasSaco.length > 0) {
+      var ficha = fichasSaco.pop();
+      if (jugador) {ficha.id = 'F' + ficha.id.substr(1);} else {ficha.id = 'C' + ficha.id.substr(1);}
+      if (traza) {console.log("robo ficha " + ficha.id);}
+      if (jugador) {
+        ficha.draggable = "true";
+        ficha.setAttribute("ondragstart", "dragStart(event)");
+        filaJugador.appendChild(ficha);
+      } else {
+        filaMaquina.appendChild(ficha);
+     }
+    } else if (!sacoVacioAlerted) {
+      textoC.innerHTML='<font color="red">El saco está vacío</font>'; 
+      sacoVacioAlerted = true
     }
+  } else { //empieza una nueva jugada sin robar
+    fichaJugada = false;
+    document.getElementById("Cambio").innerHTML="Robar ficha";
+    document.getElementById("Cambio").classList.remove("btn-primarry");
+    document.getElementById("Cambio").classList.add("btn-danger");
+  }
+  if (jugador && !auto) {
+    jugadaCompoAuto(false, false);
+  }
 }
-    
+
+ 
 
 /*********************************************************************************** */
-/*********   El computador o juggador automatico calcula su jugada *************************************** */
+/*   El computador (siempre) o jugador (solo en automático) calcula su jugada        */
 /*********************************************************************************** */
 var mensaje = "";
-var vencedor = false;
-var unavez;
-function jugadaComp(jugador) {
+var hayVencedor = false;
+function jugadaCompoAuto(jugador, auto) {
   unavez = false;
-  while(!vencedor && !unavez){
+  while(!hayVencedor){
     if (traza && jugador)  console.log("jug. " + contadorJugadas + " ************* 1. JUGADOR **************");
     if (traza && !jugador) console.log("jug. " + contadorJugadas + " ************* 2. COMPUTADOR ***********");
-    if (humano && !jugador) unavez=true;
-    
     for (let stop = 8; stop; stop--) { // 8 es una salvaguarda para que no se hagan inf iteraciones
-      var bs = buscarSeries(jugador);
+      var bs = buscarSeries(jugador,true);
       var ns = bs.split("-")[0] == "S"? bs.split("-")[1]:0;
-      var be = buscarEscaleras(jugador);
+      var be = buscarEscaleras(jugador,true);
       var ne = be.split("-")[0] == "E"? be.split("-")[1]:0;
     
       if (ns > ne) {
-        buscarSeries(jugador);
+        buscarSeries(jugador, false);
         mensaje = mensaje + " - serie de " + ns + " fichas";
         console.log("Serie " + ns + " fichas");
       } else if (ne > 0) {  // ns <= ne, luego ns != 0 ==> ne != 0 
-        buscarEscaleras(jugador);
+        buscarEscaleras(jugador, false);
         mensaje = mensaje + " - escalera de " + ne + " fichas";
         console.log("Escalera " + ne + " fichas");
       }
       if (ne == 0 && ns == 0) {
-        console.log("no Serie ni Escalera");
+        console.log("no hay ni Series ni Escaleras");
         if (!ampliarEscalera(jugador)) {
-          console.log("no AmpliaEsc");
+          console.log("no se puede Ampliar Escaleras");
           if (!ampliarSerie(jugador))  {
-            console.log("no AmpliaSer");
+            console.log("no se puede Ampliar Series");
             if (!buscarCortes(jugador)) {
-              console.log("no Cortes");
+              console.log("no encuentro Cortes");
               textoJ.innerHTML = jugador?"JUGADOR":"COMPUTADOR:" 
-              textoJ.innerHTML += " pulse CAMBIO para pasar el turno al ";
-              textoJ.innerHTML += jugador?"computador":"jugador";
+              textoJ.innerHTML += " no encuentro jugada  ";
+              //textoJ.innerHTML += jugador?"computador":"jugador";
               break;
             } else mensaje  = mensaje + " - corte";
           } else mensaje = mensaje + "- amplío serie";
         } else mensaje = mensaje + " - amplío escalera";
       }
-      //console.log(mensaje);
       contadorJugadas++;
       seleccionarGrupo.call(buscaMarca(jugador));
     } //del for
-     robarFicha(jugador);
-    jugador = !jugador;
+
+   robarFicha(jugador);
+ 
+   
+    // // document.getElementById("Sugerir").style.display="none"; 
+  document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substring(0,8) + (document.getElementById("filaMaquina").cells.length) + " fichas";
+    //   setTimeout(aviso, 1000);
+    //   function aviso() {
+    //     alert("COMPUTADOR: jugada concluída: " + mensaje + " - Cambio a TURNO JUGADOR");
+    //     mensaje ="";
+    //   }
+    // } else if(!jugador && !auto) {
+    //   if (traza) console.log("************** 1. JUGADOR ****************");
+    //   textoJ.innerHTML = "JUGADOR: arrastre fichas del jugador, de la mesa o pida sugerencia";
+    //   document.getElementById("Jugada").style.display="inline"; 
+    // }
+    // si es una jugada del computador
+    if (!jugador) {
+      document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substring(0,8) + (document.getElementById("filaMaquina").cells.length) + " fichas";
+    }
+      if (!auto) {
+        // setTimeout(aviso, 1000);
+        // function aviso() {
+        textoC.innerHTML="Jugada COMPUTADOR: " + mensaje + " - Cambio de TURNO a JUGADOR";
+        mensaje ="";
+        break;
+        // robarFicha(false);  // el computador "roba ficha" o "cambia"
+      }
+    
     if (contadorJugadas == 100) {
-      vencedor=true;
-      console.log("No hay vencedor. ¡100 jugadas!");
+      hayVencedor=true;
+      console.log("TABLAS. ¡100 jugadas!");
+      textoC.innerHTML="TABLAS. ¡100 jugadas!";
+      textoJ.innerHTML="TABLAS. ¡100 jugadas!";
+
     };
-    if (proclamarGanador() == 1 || proclamarGanador() == 2) {
-      vencedor=true;
+    if (proclamarGanador() > 0) {
+      hayVencedor=true;
       console.log("The END");
     }
-} // del while
 
+} // del while
 }
 
+/*********************************************************************************** */
+function sugerirJugada() {
+  var be = buscarEscaleras(true);
+  var ne = (be.split("-")[0] == "E")? be.split("-")[1]:0;
+  var bs = buscarSeries(true);
+  var ns = (bs.split("-")[0] == "S")? bs.split("-")[1]:0;
 
+  if (ns > ne) buscarSeries(true);
+  else buscarEscaleras(true);
+
+  if ((ne == 0) && (ns == 0)) {
+    if (!ampliarEscalera(true)) 
+      if (!ampliarSerie(true))
+        if (!buscarCortes(true)) {
+          textoJ.innerHTML = "JUGADOR: No hay ninguna jugada con las fichas de tu mano"
+        }
+  }
+}
+ 
 //*************************************************************************** */
 function  buscaMarca(jugador) {
   var fichas = jugador?[...filaJugador.cells]:[...filaMaquina.cells];
@@ -1090,20 +1114,16 @@ function buscarCortes(jugador) {
   var cortadoIzda = false;
   var cortadoDcha = false;
   var codJ;
+  var arrJ;
   if (traza) console.log(num_traza++ + " Busco Cortes");
 
-  // filaJugador = document.getElementById("filaJugador");
   if (jugador) arrJ = filaFichasAArrayCodigos(filaJugador);
   else arrJ = filaFichasAArrayCodigos(filaMaquina);
-  //filaMaquina = document.getElementById("filaMaquina");
-
-  EMesa = EMesa.filter(el => !el.id.startsWith("E-3"));
-  var arrJ;
-  ordenar(arrJ);
+  EMesa = EMesa.filter(el => !el.id.startsWith("E-3"));  // las esaleras de 3 nose pueden cortar
+  ordenarArray(arrJ);
   for (let i = 0; i < arrJ.length; i++) {  
     for (var ff = 0; ff < EMesa.length; ff++) {
       var arrGM =filaFichasAArrayCodigos(EMesa[ff]);
-
       for (let k = 1; k <= Math.floor((arrGM.length-1)/2); k++) {// cortes por la izda
         if (!cortadoIzda) {
           if (k == 1) {
@@ -1146,6 +1166,8 @@ function buscarCortes(jugador) {
 
       if (!cortadoIzda && !cortadoDcha) {
         if (((arrGM.length % 2) == 0) && (arrGM.length > 5)) {  // corte mitad y mitad, ampl dcha
+                                                                // los grupos de 6 o más (pares) se pueden partir por la mitad 
+                                                                //  y forman escaleras válidas
           if ((arrJ[i] == (arrGM[(arrGM.length / 2) - 1]))) {
             cortesD = arrGM.length / 2;
             codJ = i;
@@ -1173,7 +1195,7 @@ function buscarCortes(jugador) {
           ficha1.setAttribute("lado", (cortesI?'izda':'dcha'));
           ficha1.setAttribute("cortes", cortesI?cortesI:cortesD);
           if (cortesD == 1 || cortesI == 1){
-            ficha2 = document.getElementById('F' + arrJ[codJ + 1]);
+            ficha2 = document.getElementById((jugador?'F':'C') + arrJ[codJ + 1]);
             ficha2.classList.add('marcada');  //marcado visual
             ficha2.setAttribute("gType", 'C');
             ficha2.setAttribute("numGrupo", numGrupo); // id único de grupo
@@ -1209,6 +1231,7 @@ function buscarCortes(jugador) {
 //*****************************************************************************
 
 // function seleccionarCorte() {
+//
 //   textoJ.innerHTML = "JUGADOR: modo MESA salga de este modo con ACEPTAR o CANCELAR";
 //   if (!modoCancelable) {
 //     modoCancelable = true;
@@ -1331,6 +1354,19 @@ function cancelarJugada() {
 //******************        FUNCIONES AUXILIARES        ******************** */
 //************************************************************************** */
 //************************************************************************* */
+//function codifValor(arrColor)
+//function codifColor(arrValor, desDup) 
+//function obtenerCodigo(arr)
+//function obtenerVector()
+//function trazaMesa()
+// function filaFichasAArrayCodigos(fila)
+// function marcarFilaMesa(fila, consume)
+// function limpiaFila(fichas)
+// function ordenarValorOColor(){
+
+
+// function modoAutomatico() 
+
 
 // ***************************************************************************
 // Convierte codificación por color en codif por valor
@@ -1389,7 +1425,7 @@ function obtenerCodigo(arr) {
     codigo = "E-" + arr.length + "-" + arr[0] % 100 + "-" +  Math.floor(arr[0] / 100);
   } else {  // es una serie
     codigo = "S-" + arr.length + "-" + arr[0] % 100 + "-";
-    ordenar(arr);
+    ordenarArray(arr);
     if (arr.length == 3){ // si es una S-3 hay que calcular el color excluido
       for (let i = 0; i < 3; i++) {
         if ( Math.floor(arr[i] / 100) != i) {
@@ -1462,10 +1498,7 @@ function filaFichasAArrayCodigos(fila) {
   for (let i=0; i < fichas.length; i++) {
     fichas[i].classList.remove('error', 'marcada', 'permiso', 'marcasuave');
     hazNoDropable(fichas[i]);
-  // //  fichas[i].addEventListener("dblclick",  seleccionarCorte);
-  //   fichas[i].draggable = "true";
-  fila.id = obtenerCodigo(filaFichasAArrayCodigos(fila));
-  //   fichas[i].setAttribute("ondragstart", "dragStart(event)");
+    fila.id = obtenerCodigo(filaFichasAArrayCodigos(fila));
   }
   hazDropable(fichas[0]);
   hazDropable(fichas[fichas.length-1]);
@@ -1515,7 +1548,7 @@ function desDuplicador(arr){
 }
 
 /******************************************************************************/
-function ordenar(arr) {  
+function ordenarArray(arr) {  
   arr.sort(function (a, b) {
       return a - b;
     });
@@ -1524,7 +1557,7 @@ function ordenar(arr) {
 /******************************************************************************/
 function esSerie(arr) {
   if (arr.length > 4) return false;
-  ordenar(arr);
+  ordenarArray(arr);
   var color = arr.map(el => Math.floor(el / 100));
   var valor = arr.map(el => el % 100);
   if (color[arr.length-1] == 4) { // es un comodin
@@ -1565,7 +1598,7 @@ function ordenarFila(arr, fila) {
 
  /******************************************************************************/
  function esEscalera(arr) {
-   ordenar(arr);
+  ordenarArray(arr);
    var color= arr.map(el => Math.floor(el / 100));
    var valor = arr.map(el => el % 100);
    if (color[arr.length-1] == 4) { // es un comodin
@@ -1628,7 +1661,10 @@ function copiarTabla() {
     }     
   }
 
-
+//*****************************************************************************
+//***********  repone la copia de seguridad de las filas de la mesa        ****
+//***********  y la del jugador para deshacer arrastres erróneo            ****
+//*****************************************************************************
 
 function reponerTabla() {
 
@@ -1723,29 +1759,37 @@ function verBotonesJugadas() {
 function proclamarGanador() {
   var fichasJugador = [...filaJugador.cells];
   var fichasMaquina = [...filaMaquina.cells];
+  
   if (fichasJugador.length == 0 ) {
-    console.log("El ganador es el JUGADOR. Terminó el juego");
-    alert("El ganador es el JUGADOR. Terminó el juego");
+    console.log("El JUGADOR gana. Terminó el juego");
+    textoC.innerHTML="El JUGADOR gana. Terminó el juego";
+    textoJ.innerHTML="El JUGADOR gana. Terminó el juego";
     return(1);
-  }
-  if ( fichasMaquina.length == 0) {
-    console.log("El ganador es el COMPUTADOR. Terminó el juego");
-    alert("El ganador es el COMPUTADOR. Terminó el juego");
-    rewturn(2);
-  }
+  } else if (fichasMaquina.length == 0) {
+    console.log("El COMPUTADOR gana. Terminó el juego");
+    textoC.innerHTML="El COMPUTADOR gana. Terminó el juego";
+    textoJ.innerHTML="El COMPUTADOR gana. Terminó el juego";
+    return(2);
+  } else if (fichasSaco.length == 0) {
+    textoC.innerHTML="TABLAS. Saco vacío. Terminó el juego";
+    textoJ.innerHTML="TABLAS. Saco vacío. Terminó el juego";
+    return(3);
+  } else return(0);
 }
 
+
+/******************************************************************************/
 var ordenXColor = true;
 function ordenarValorOColor(){
   let arr =filaFichasAArrayCodigos(filaJugador);
   if (ordenXColor) {
     arr= codifValor(arr);
-    ordenar(arr);
+    ordenarArray(arr);
     arr= codifColor(arr);
     ordenarFila(arr,filaJugador);  
     document.getElementById("ordenarValorOColor").innerHTML = "Ord. x Color";
   } else {
-    ordenar(arr);
+    ordenarArray(arr);
     ordenarFila(arr,filaJugador);    
     document.getElementById("ordenarValorOColor").innerHTML = "Ord. x Valor";
   }
@@ -1758,14 +1802,18 @@ function avisoComodin(){
 }
 
 function codigoColor(c,v) {
-
   return c * 100 + v;
 }
 //modo automático
 function modoAutomatico() {
-  humano = false;
   document.getElementById("CompComp").style.display = "none";
   document.getElementById("cabecera1").innerHTML = "1. Jugador (modo AUTOMÁTICO)";
   mostrarManoComutador();
-  jugadaComp(true);
+  jugadaCompoAuto(true, true);
 }
+
+
+
+
+// function alerta(mensaje) {
+//   document.getElementById("avisos").innerHTML = "La bolsa está vacía";}

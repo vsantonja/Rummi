@@ -68,14 +68,17 @@ table {
   width:400px;
 }
 
-#textoJugador{
+#textoJugador,#textoComp{
   height: 35;
   vertical-align: middle;
   background-color:rgb(210, 210, 210);
   padding: 8px;
-  margin-left:400px;
+  /* margin-left:410px; */
 }
 
+#textoJugador{
+  float:left;
+}
 #cuerpo{ 
   margin: 0px;
   top: 100px;
@@ -94,7 +97,7 @@ table {
   left: 5px;
   margin: 0px; 
   width: 100px;
-  height: 550px;
+  height: 540px;
   background-color: darkslategrey;
 }
 
@@ -200,7 +203,7 @@ table {
 
 
  #zonaMesaRummy{
-  column-count: 2;
+  column-count: 3;
   column-rule-width: 1px;
   column-rule-color: white;
   column-fill:auto;
@@ -235,11 +238,8 @@ table {
         margin-right: auto; */
     }
 
-
-    
-    
-#zonaComp{
-    margin-left: 100px;
-
-
+#BotonComp,#textoComp{
+    /* margin-left: 100px; */
+    float:left;
 }
+
