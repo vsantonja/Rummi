@@ -9,7 +9,7 @@
 /*****************************************************************************/
 
 
-const arrayColores = ["black", "red", "blue", "green"];
+const arrayColores = ["black", "red", "blue", "#00AA00"];
 const juegosFichas = 2;
 const comodines = 0;
 var contadorJugadas = 1;
@@ -47,7 +47,7 @@ function dragStart(ev) {
     document.getElementById("botonAmpS").style.display = "none";
     document.getElementById("botonAmpE").style.display = "none";        
     document.getElementById("buscarCortes").style.display = "none" ;
-    textoJ.innerHTML = "JUGADOR: operación cancelable. Al terminar con el movimiento de fichas debe Aceptar o Cancelar";
+    textoJ.innerHTML = "Operación cancelable. Al terminar con el movimiento de fichas debe Aceptar o Cancelar";
     if (traza) console.log("Inicio arrrastre de ficha" + ev.target.id);
   }
   fm=ev.target; // la ficha móvil (la que se arrastra). Se guarda porque el dataTransfer.getData() solo se puede conocer en el "drop"
@@ -270,7 +270,7 @@ var sacoVisible = true;
 }
 
 function inicio() {
-  alert( "Rumiant versió 0.1- V. Santonja (20/3/2021). Programa  que permite que un jugador de carne y hueso compita al Rummikub contra el computador. ATCHUNG!: No maneja los _comodines_");
+  alert( "Rumiant versió 0.1- V. Santonja (20/3/2021). Programa que permite que un jugador de carne y hueso compita al Rummi contra el computador. ATCHUNG!: No maneja los _comodines_");
   iniciar(0);
 }
 
@@ -361,13 +361,14 @@ function iniciar(prueba) {
   }  
   // solo se reparte una vez. Así que escondo los botones de reparto
   document.getElementById("botonRepartir" ).style.display = "none";  
-  textoJ.innerHTML = "JUGADOR: Arrastra fichas del jugador a la mesa o pide una sugererencia";
+  textoJ.innerHTML = "Arrastra fichas del jugador 1 a la mesa o pide una sugererencia";
 //document.getElementById("MMC").innerHTML = document.getElementById("MMC").innerHTML.substr(8) + " 14 fichas";
   document.getElementById("MMC").innerHTML = "Ver       14 fichas";
   document.onclick = function(ev) {
     var btnAutomatico=document.getElementById("CompComp");              
     if (!(ev.target.id == "CompComp")) { 
       btnAutomatico.style.display="none";
+      document.getElementById("cabecera1").innerHTML = "Jugador 1: MANUAL";
     }
   };
 
@@ -638,7 +639,7 @@ function buscarSeries(jugador, tanteo) {
       }
    }
       marcarFichas("S", series[serIdxMax], jugador);
-        textoJ.innerHTML = "JUGADOR: Haz doble click la serie marcada";
+        textoJ.innerHTML = "Haz doble click la serie marcada";
         ret = "S-" + serLenMax;
   } else if (cont > 0) { // serie de 2 completada con una ficha de la mesa
     for (let i =0; i < nuevaserie.length; i++) {
@@ -647,7 +648,7 @@ function buscarSeries(jugador, tanteo) {
       var auxFichas = [...s4Mesa[contS4-1].cells].map(el => parseInt(el.id.substr(1)));
       var indxc=auxFichas.indexOf(c*100+v);
       marcarFichas("s", nuevaserie[i], jugador, nuevoCodigoS3Mesa, lado, s4Mesa[contS4-1].cells[indxc]);
-      textoJ.innerHTML = "JUGADOR: Haz doble click sobre la(s) serie(s) marcada(s) y una ficha de la mesa";
+      textoJ.innerHTML = "Haz doble click sobre la serie marcada que se completa con una ficha de la mesa";
     } 
     ret = "S-2";
   } else if (conte4omas >0)   {
@@ -655,11 +656,11 @@ function buscarSeries(jugador, tanteo) {
       var nuevoCodigoEMesa = "E-" + num + "-" + c;
       var lado;
       marcarFichas("s", nuevaserie[i], jugador, nuevoCodigoEMesa, lado, e4Mesa[contE4-1].cells[posic]);
-      textoJ.innerHTML = "JUGADOR: Haz doble click sobre la(s) serie(s) marcada(s) y una ficha de la mesa";
+      textoJ.innerHTML = "Haz doble click sobre la serie marcada que se completa con una ficha de la mesa";
     } 
     ret = "S-2";
   }
-  if (traza) console.log(" devuelve un " + ret);
+  if (traza) console.log(" devuelve " + ret);
   return ret;
 }
 
@@ -752,7 +753,7 @@ function buscarEscaleras(jugador, tanteo) {
     //for (let i = 0; i < cuentaE3; i++) {
      // marcarFichas("E", escalera[i], jugador);
       marcarFichas("E", escalera[escIdxMax], jugador);
-      textoJ.innerHTML = "JUGADOR: Haz doble click sobre la escalera marcada";
+      textoJ.innerHTML = "Haz doble click sobre la escalera marcada";
       ret = "E-" + escLenMax;
     
   } else if (cuentaE2 > 0) {
@@ -813,7 +814,7 @@ function buscarEscaleras(jugador, tanteo) {
               esc2[i][2] =  fichaAMover.id.substr(1);
               if (esE) cgm = "E-" + (gruposMesa[f].id.split("-")[1]-1) + "-";
               marcarFichas("e", esc2[i], jugador, cgm, (porIzda?"izda":"dcha"),fichaAMover);
-              textoJ.innerHTML = "JUGADOR: Haz doble click sobre la escalera marcada (2 fichas) junto a una ficha de la mesa";
+              textoJ.innerHTML = "Haz doble click sobre la escalera marcada que se completa con una ficha de la mesa";
               ret = "E-2"
             }
           }
@@ -862,7 +863,7 @@ function ampliarSerie(jugador){
     }
   }
   if (hayAmpliacion && jugador) {
-    textoJ.innerHTML = "JUGADOR: Amplia la serie de la mesa haciendo doble click sobre la ficha en tu mano"
+    textoJ.innerHTML = "Amplia la serie de la mesa haciendo doble click sobre la ficha en tu mano"
   }
   return hayAmpliacion;
 }
@@ -907,7 +908,7 @@ function ampliarEscalera(jugador){
     }
   }
   if (hayAmpliacionEsc && jugador) {
-    textoJ.innerHTML = "JUGADOR: Amplia la escalera de la mesa haciendo doble click sobre la ficha en tu mano"
+    textoJ.innerHTML = "Amplía la escalera de la mesa haciendo doble click sobre la ficha en tu mano"
   }
   return hayAmpliacionEsc;
 }
@@ -1021,9 +1022,13 @@ function jugadaCompoAuto(jugador, auto) {
             console.log("no se puede Ampliar Series");
             if (!buscarCortes(jugador)) {
               console.log("no encuentro Cortes");
-              textoJ.innerHTML = jugador?"JUGADOR":"COMPUTADOR:" 
-              textoJ.innerHTML += " no encuentro jugada  ";
-              //textoJ.innerHTML += jugador?"computador":"jugador";
+              if (jugador) {
+                textoJ.innerHTML = "No encuentro ninguna jugada";
+                textoC.innerHTML = "";
+              } else {
+                textoC.innerHTML = "No encuentro ninguna jugada";
+                textoJ.innerHTML = "";
+              }
               break;
             } else mensaje  = mensaje + " - corte";
           } else mensaje = mensaje + "- amplío serie";
@@ -1055,7 +1060,7 @@ function jugadaCompoAuto(jugador, auto) {
       if (!auto) {
         // setTimeout(aviso, 1000);
         // function aviso() {
-        textoC.innerHTML="Jugada COMPUTADOR: " + mensaje + " - Cambio de TURNO a JUGADOR";
+        textoC.innerHTML="Jugada COMPUTADOR: " + mensaje + " - Cambio de TURNO a JUGADOR 1";
         mensaje ="";
         break;
         // robarFicha(false);  // el computador "roba ficha" o "cambia"
@@ -1063,9 +1068,9 @@ function jugadaCompoAuto(jugador, auto) {
     
     if (contadorJugadas == 100) {
       hayVencedor=true;
-      console.log("TABLAS. ¡100 jugadas!");
-      textoC.innerHTML="TABLAS. ¡100 jugadas!";
-      textoJ.innerHTML="TABLAS. ¡100 jugadas!";
+      console.log("¡100 jugadas!");
+      textoC.innerHTML="¡100 jugadas!";
+      textoJ.innerHTML="¡100 jugadas!";
 
     };
     if (proclamarGanador() > 0) {
@@ -1090,7 +1095,7 @@ function sugerirJugada() {
     if (!ampliarEscalera(true)) 
       if (!ampliarSerie(true))
         if (!buscarCortes(true)) {
-          textoJ.innerHTML = "JUGADOR: No hay ninguna jugada con las fichas de tu mano"
+          textoJ.innerHTML = "No encuentro ninguna jugada con las fichas de tu mano"
         }
   }
 }
@@ -1223,7 +1228,7 @@ function buscarCortes(jugador) {
   }
   numGrupo++;
   if (cortesD || cortesI) {
-    if (jugador) {textoJ.innerHTML = "JUGADOR: Modifica el grupo de la mesa haciendo doble click sobre la ficha en tu mano";}
+    if (jugador) {textoJ.innerHTML = "Modifica el grupo de la mesa haciendo doble click sobre la ficha en tu mano";}
     return true;
   } else return false;
 }
@@ -1311,7 +1316,7 @@ function aceptarJugada() {
   // hazDraggable(filaJugador);
   for (let i = 1; i < gruposMesa.length; i++) { //recuerda que i=0 es rummy
     if (gruposMesa[i].cells.length < 3) {
-      textoJ.innerHTML = "Esta jugada no se puede aceptar. Cancele y haga una nueva jugada";    
+      textoJ.innerHTML = "Esta jugada no se puede aceptar. CANCELE y haga una nueva jugada";    
       return;
     }
   }
@@ -1327,7 +1332,7 @@ function aceptarJugada() {
     document.getElementById("Cambio").classList.remove("btn-rojo");
     document.getElementById("Cambio").classList.add("btn");
   }
-  textoJ.innerHTML = "JUGADOR: Operación ACEPTADA. Arrastre fichas del jugador, de la mesa o pida una sugerencia";
+  textoJ.innerHTML = "Operación ACEPTADA. Arrastra fichas del jugador 1, de la mesa o pida una sugerencia";
 }
 
 function cancelarJugada() {
@@ -1507,7 +1512,7 @@ function filaFichasAArrayCodigos(fila) {
     document.getElementById("Cambio").innerHTML="Cambio turno";
     document.getElementById("Cambio").classList.remove("btn-rojo");
     document.getElementById("Cambio").classList.add("btn");
-    textoJ.innerHTML = "JUGADOR: arrastre fichas del jugador, de la mesa o pida una sugerencia";
+    textoJ.innerHTML = "Arrastra fichas del jugador 1, de la mesa o pida una sugerencia";
 }
  }
  /* ****************************************************************************** */
@@ -1711,7 +1716,7 @@ function reponerTabla() {
   }
   limpiaFila(filaJugador);
   hazDraggable(filaJugador);
-  textoJ.innerHTML = "JUGADOR: operación cancelada. Arrastre fichas del jugador, de la mesa o pida una sugerencia";
+  textoJ.innerHTML = "Operación CANCELADA. Arrastra fichas del jugador 1, de la mesa o pida una sugerencia";
 }
 
 
@@ -1762,8 +1767,8 @@ function proclamarGanador() {
   
   if (fichasJugador.length == 0 ) {
     console.log("El JUGADOR gana. Terminó el juego");
-    textoC.innerHTML="El JUGADOR gana. Terminó el juego";
-    textoJ.innerHTML="El JUGADOR gana. Terminó el juego";
+    textoC.innerHTML="El JUGADOR 1  gana. Terminó el juego";
+    textoJ.innerHTML="El JUGADOR 1 gana. Terminó el juego";
     return(1);
   } else if (fichasMaquina.length == 0) {
     console.log("El COMPUTADOR gana. Terminó el juego");
@@ -1771,8 +1776,8 @@ function proclamarGanador() {
     textoJ.innerHTML="El COMPUTADOR gana. Terminó el juego";
     return(2);
   } else if (fichasSaco.length == 0) {
-    textoC.innerHTML="TABLAS. Saco vacío. Terminó el juego";
-    textoJ.innerHTML="TABLAS. Saco vacío. Terminó el juego";
+    textoC.innerHTML="Saco vacío. Jugador 1 y computador bloqueados. Terminó el juego";
+    textoJ.innerHTML="Saco vacío. Jugador 1 y computador bloqueados. Terminó el juego";
     return(3);
   } else return(0);
 }
@@ -1798,7 +1803,7 @@ function ordenarValorOColor(){
 
 
 function avisoComodin(){
-  textoJ.innerHTML = "COMODIN. Antes de arrastarla debe asignarle un valor y color concreto. Haga doble click sobre la ficha"
+  textoJ.innerHTML = "COMODIN. Antes de arrastarla debes asignarle un valor y color concreto. Haz doble click sobre la ficha"
 }
 
 function codigoColor(c,v) {
@@ -1807,7 +1812,7 @@ function codigoColor(c,v) {
 //modo automático
 function modoAutomatico() {
   document.getElementById("CompComp").style.display = "none";
-  document.getElementById("cabecera1").innerHTML = "1. Jugador (modo AUTOMÁTICO)";
+  document.getElementById("cabecera1").innerHTML = "Jugador 1: AUTOMÁTICO";
   mostrarManoComutador();
   jugadaCompoAuto(true, true);
 }

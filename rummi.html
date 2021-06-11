@@ -5,14 +5,14 @@
   <meta osearset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="rummi.css">
-  </head>
+</head>
    
 <body onload="inicio()">
     
     <div id="cabecera">
         <div id="botonera">
             <button type="button" class="btn btn-rojo center-varios" onclick="nuevoJuego()">Comenzar</button>
-            <button type="button" class="btn center-varios" onclick="iniciar(0)"       id = "botonRepartir">Repartir</button>
+            <button type="button" class="btn center-varios" onclick="iniciar(0)"       id = "botonRepartir" style="display: none">Repartir</button> 
             <button type="button" class="btn center-varios" onclick="robarFicha(true)" id ="Cambio"> Robar ficha</button> 
             <!-- <button type="button" class="btn center-varios" onclick="iniciar(1)" id = "botonRepartir1">x</button> -->
             <button type="button" class="btn btn-naranja center-varios" onclick="cancelarJugada()"  id = "cancelarJugada"  style="display: none">Cancelar</button>
@@ -20,12 +20,12 @@
             <button type="button" class="btn center-varios" onclick="ordenarValorOColor()"          id = "ordenarValorOColor" >Ord. x valor</button>
             <button type="button" class="btn btn-naranja center-varios" onclick="modoAutomatico()"  id = "CompComp" >Automático</button>
         </div>
-        <div id="textoJugador"> ¡Hola! </div>  
+        <div id="textoJugador">Arrastra fichas del jugador 1 a la mesa o pide una sugererencia </div>
+      
     </div>
-
+  <h4 id="cabecera1"> Jugador 1</h4> 
 
     <div id=cuerpo> 
-        <h4 id="cabecera1">  1. Jugador </h4> 
         
         <table style="display: none" id="tablaDest">   </table>
         <div id="botonesjugadas">
@@ -80,7 +80,7 @@
             </div>
 <br>
             <div id="zonaMesa" ondrop="dragDropFin(event)" ondragover="allowDrop(event)" ondragleave="removeStyle(event)">    
-                Arrastre fichas aquí para crear un grupo nuevo
+                Arrastre fichas al cuadro verde para crear una escalera o serie nuevas
                 <br>
             
             <div id="zonaMesaRummy" > 
@@ -95,7 +95,7 @@
                 </table>        
             </div> 
         </div> 
-             <h4> 2. Computador </h4>
+             <h4> Jugador 2: Computador </h4>
             <div id="zonaComputador" > 
                 <div id="BotonComp" >   
                     <button type="button" class="btn center-varios" style="display: none"  onclick="mostrarManoComutador()"  id ="MMC"> Ver 0 fichas</button>
